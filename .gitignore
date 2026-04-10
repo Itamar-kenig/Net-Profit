@@ -1,2 +1,34 @@
+# Dependencies
 node_modules/
+
+# Environment – never commit secrets
 .env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+
+# Vite
+*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
