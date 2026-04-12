@@ -6,6 +6,77 @@
  */
 
 // ---------------------------------------------------------------------------
+// Period filtering
+// ---------------------------------------------------------------------------
+
+export const PERIODS = [
+  { label: 'יום',        value: '1D'  },
+  { label: 'שבוע',       value: '1W'  },
+  { label: 'חודש',       value: '1M'  },
+  { label: '3 חודשים',  value: '3M'  },
+  { label: '6 חודשים',  value: '6M'  },
+  { label: 'מתחילת שנה', value: 'YTD' },
+  { label: 'שנה',        value: '1Y'  },
+  { label: '3 שנים',     value: '3Y'  },
+  { label: '5 שנים',     value: '5Y'  },
+  { label: 'עשור',       value: '10Y' },
+  { label: 'הכל',        value: 'ALL' },
+]
+
+/**
+ * Filter a price series by period or custom date range.
+ */
+export function filterPrices(prices, period, customStart = '', customEnd = '') {
+  if (!prices || prices.length === 0) return prices
+  if (period === 'ALL') return prices
+
+  const today = new Date()
+  let startDate = null
+  let endDate = today
+
+  if (period === 'custom') {
+    startDate = customStart ? new Date(customStart) : null
+    endDate   = customEnd   ? new Date(customEnd)   : today
+    return prices.filter((p) => {
+      const d = new Date(p.date)
+      return (!startDate || d >= startDate) && d <= endDate
+    })
+  }
+
+  if (period === 'YTD') {
+    startDate = new Date(today.getFullYear(), 0, 1)
+  } else {
+    const daysMap = { '1D': 1, '1W': 7, '1M': 30, '3M': 90, '6M': 180,
+                      '1Y': 365, '3Y': 1095, '5Y': 1825, '10Y': 3650 }
+    const days = daysMap[period]
+    if (days) { startDate = new Date(today); startDate.setDate(startDate.getDate() - days) }
+  }
+
+  return prices.filter((p) => !startDate || new Date(p.date) >= startDate)
+}
+
+/**
+ * Returns annual return for each calendar year in the price series.
+ */
+export function calcYearlyReturns(prices) {
+  if (!prices || prices.length < 2) return []
+  const byYear = {}
+  for (const p of prices) {
+    const yr = new Date(p.date).getFullYear()
+    if (!byYear[yr]) byYear[yr] = []
+    byYear[yr].push(p)
+  }
+  const years = Object.keys(byYear).map(Number).sort()
+  return years.map((yr) => {
+    const arr = byYear[yr]
+    const s = (arr[0].adj_close ?? arr[0].close)
+    const e = (arr[arr.length - 1].adj_close ?? arr[arr.length - 1].close)
+    if (!s || !e) return null
+    return { year: yr, return: Number((((e - s) / s) * 100).toFixed(2)) }
+  }).filter(Boolean)
+}
+
+// ---------------------------------------------------------------------------
 // Known annual management fees (%) for common ETFs / indices
 // Index symbols have no fee because they are theoretical benchmarks.
 // ---------------------------------------------------------------------------
