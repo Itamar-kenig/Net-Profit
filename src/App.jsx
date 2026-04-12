@@ -35,6 +35,7 @@ export default function App() {
                 .select('date, adj_close, close')
                 .eq('symbol', sym)
                 .order('date', { ascending: true })
+                .limit(10000)
               if (err) throw new Error(`[${sym}] ${err.message}`)
               results[sym] = data ?? []
             })
