@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from './lib/supabase'
+import { MOCK_PRICES, isDemoMode } from './utils/mockData'
 import SearchBar from './components/SearchBar'
 import ComparisonChart from './components/ComparisonChart'
 import StatsTable from './components/StatsTable'
 
 const DEFAULT_SYMBOLS = ['^GSPC', '^IXIC']
+const DEMO = isDemoMode()
 
 export default function App() {
   const [symbols, setSymbols] = useState(DEFAULT_SYMBOLS)
@@ -23,18 +25,27 @@ export default function App() {
 
       try {
         const results = {}
-        await Promise.all(
-          missing.map(async (sym) => {
-            const { data, error: err } = await supabase
-              .from('historical_prices')
-              .select('date, adj_close, close')
-              .eq('symbol', sym)
-              .order('date', { ascending: true })
 
-            if (err) throw new Error(`[${sym}] ${err.message}`)
-            results[sym] = data ?? []
+        if (DEMO) {
+          // Demo mode: use locally generated mock data
+          missing.forEach((sym) => {
+            results[sym] = MOCK_PRICES[sym] ?? []
           })
-        )
+        } else {
+          await Promise.all(
+            missing.map(async (sym) => {
+              const { data, error: err } = await supabase
+                .from('historical_prices')
+                .select('date, adj_close, close')
+                .eq('symbol', sym)
+                .order('date', { ascending: true })
+
+              if (err) throw new Error(`[${sym}] ${err.message}`)
+              results[sym] = data ?? []
+            })
+          )
+        }
+
         setPricesMap((prev) => ({ ...prev, ...results }))
       } catch (e) {
         setError(e.message)
@@ -87,6 +98,18 @@ export default function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+        {/* Demo mode banner */}
+        {DEMO && (
+          <div className="bg-yellow-950 border border-yellow-700 text-yellow-300 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+            <span>⚠️</span>
+            <span>
+              <strong>מצב Demo</strong> – מוצגים נתונים מדומים. לנתונים אמיתיים: הגדר{' '}
+              <code className="bg-yellow-900 px-1 rounded">VITE_SUPABASE_URL</code> ב-
+              <code className="bg-yellow-900 px-1 rounded">.env</code> והרץ את סקריפט ה-Python.
+            </span>
+          </div>
+        )}
+
         {/* Search */}
         <SearchBar onAdd={addSymbol} />
 
