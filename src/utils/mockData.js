@@ -111,7 +111,7 @@ export const MOCK_PRICES = {
 }
 
 export function isDemoMode() {
-  const url = import.meta.env.VITE_SUPABASE_URL ?? ''
+  const url = import.meta.env.VITE_SUPABASE_URL || 'https://vwmcuhkwjvcxnnzndgac.supabase.co'
   const demo = import.meta.env.VITE_DEMO_MODE ?? ''
-  return demo === 'true' || !url || url.includes('your-project-id')
+  return demo === 'true' || url.includes('your-project-id')
 }
