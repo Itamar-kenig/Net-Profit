@@ -38,6 +38,8 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
 
   const cell = { padding: '10px 14px', fontSize: 13 }
   const th = { ...cell, color: '#6b7280', fontWeight: 500, borderBottom: '1px solid #1f2937', textAlign: 'right' }
+  const stickyTh = { ...th, position: 'sticky', right: 0, background: '#0f172a', zIndex: 2 }
+  const stickyCell = { ...cell, position: 'sticky', right: 0, background: '#111827', zIndex: 1 }
   const periodLabel = getPeriodLabel(period, customStart, customEnd)
 
   return (
@@ -66,8 +68,8 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr>
-              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול'].map((h) => (
-                <th key={h} style={th}>{h}</th>
+              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול'].map((h, i) => (
+                <th key={h} style={i === 0 ? stickyTh : th}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -100,7 +102,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
 
               return (
                 <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>
-                  <td style={cell}>
+                  <td style={stickyCell}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block' }} />
                       <span style={{ color: 'white', fontWeight: 600 }}>{sym}</span>

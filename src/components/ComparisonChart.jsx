@@ -29,48 +29,72 @@ function CustomTooltip({ active, payload, label }) {
   )
 }
 
+const BENCHMARK_SYM = '^GSPC'
+
 export default function ComparisonChart({
   symbols, pricesMap, period, setPeriod,
   customStart, customEnd, setCustomStart, setCustomEnd,
+  benchmark, benchmarkData, onToggleBenchmark,
 }) {
   const filteredMap = {}
   for (const sym of symbols) {
     filteredMap[sym] = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
   }
-  const chartData = buildChartData(symbols, filteredMap)
+  const showBenchmarkLine = benchmark && benchmarkData?.length > 0 && !symbols.includes(BENCHMARK_SYM)
+  if (showBenchmarkLine) {
+    filteredMap[BENCHMARK_SYM] = filterPrices(benchmarkData, period, customStart, customEnd)
+  }
+  const chartSymbols = showBenchmarkLine ? [...symbols, BENCHMARK_SYM] : symbols
+  const chartData = buildChartData(chartSymbols, filteredMap)
 
   return (
     <div style={{ background:'#111827', border:'1px solid #1f2937', borderRadius:12, padding:16 }}>
-      {/* Period buttons */}
-      <div style={{ display:'flex', flexWrap:'wrap', gap:6, marginBottom:12, alignItems:'center' }}>
-        <span style={{ color:'#6b7280', fontSize:12 }}>תקופה:</span>
-        {PERIODS.map((p) => (
+      {/* Period buttons row — horizontally scrollable on mobile */}
+      <div style={{ overflowX:'auto', marginBottom:8, marginInline:-16, paddingInline:16 }}>
+        <div style={{ display:'flex', gap:6, alignItems:'center', minWidth:'max-content' }}>
+          <span style={{ color:'#6b7280', fontSize:12 }}>תקופה:</span>
+          {PERIODS.map((p) => (
+            <button
+              key={p.value}
+              onClick={() => setPeriod(p.value)}
+              style={{
+                padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+                background: period === p.value ? '#4ade80' : '#1f2937',
+                color:       period === p.value ? '#030712' : '#9ca3af',
+                border:      period === p.value ? 'none'    : '1px solid #374151',
+                fontWeight:  period === p.value ? 600       : 400,
+              }}
+            >
+              {p.label}
+            </button>
+          ))}
           <button
-            key={p.value}
-            onClick={() => setPeriod(p.value)}
+            onClick={() => setPeriod('custom')}
             style={{
               padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
-              background: period === p.value ? '#4ade80' : '#1f2937',
-              color:       period === p.value ? '#030712' : '#9ca3af',
-              border:      period === p.value ? 'none'    : '1px solid #374151',
-              fontWeight:  period === p.value ? 600       : 400,
+              background: period === 'custom' ? '#4ade80' : '#1f2937',
+              color:       period === 'custom' ? '#030712' : '#9ca3af',
+              border:      period === 'custom' ? 'none'    : '1px solid #374151',
+              fontWeight:  period === 'custom' ? 600       : 400,
             }}
           >
-            {p.label}
+            תאריך מותאם
           </button>
-        ))}
-        <button
-          onClick={() => setPeriod('custom')}
-          style={{
-            padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
-            background: period === 'custom' ? '#4ade80' : '#1f2937',
-            color:       period === 'custom' ? '#030712' : '#9ca3af',
-            border:      period === 'custom' ? 'none'    : '1px solid #374151',
-            fontWeight:  period === 'custom' ? 600       : 400,
-          }}
-        >
-          תאריך מותאם
-        </button>
+          {/* Benchmark toggle */}
+          {onToggleBenchmark && (
+            <button
+              onClick={onToggleBenchmark}
+              style={{
+                padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+                background: benchmark ? '#374151' : '#1f2937',
+                color: benchmark ? '#d1d5db' : '#6b7280',
+                border: benchmark ? '1px solid #6b7280' : '1px solid #374151',
+              }}
+            >
+              {benchmark ? '✕ S&P 500' : '⚖ S&P 500'}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Custom date range */}
@@ -112,6 +136,9 @@ export default function ComparisonChart({
               {symbols.map((sym, i) => (
                 <Line key={sym} type="monotone" dataKey={sym} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={2} connectNulls />
               ))}
+              {showBenchmarkLine && (
+                <Line key={BENCHMARK_SYM} type="monotone" dataKey={BENCHMARK_SYM} stroke="#6b7280" dot={false} strokeWidth={1.5} strokeDasharray="5 3" connectNulls />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>

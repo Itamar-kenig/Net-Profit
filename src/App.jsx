@@ -6,6 +6,21 @@ import ComparisonChart from './components/ComparisonChart'
 import StatsTable from './components/StatsTable'
 
 const DEMO = isDemoMode()
+const CACHE_TTL = 4 * 60 * 60 * 1000 // 4 hours
+
+function getCached(sym) {
+  try {
+    const item = localStorage.getItem(`np-prices-${sym}`)
+    if (!item) return null
+    const { data, ts } = JSON.parse(item)
+    if (Date.now() - ts > CACHE_TTL) { localStorage.removeItem(`np-prices-${sym}`); return null }
+    return data
+  } catch { return null }
+}
+
+function setCached(sym, data) {
+  try { localStorage.setItem(`np-prices-${sym}`, JSON.stringify({ data, ts: Date.now() })) } catch {}
+}
 
 export default function App() {
   const [symbols, setSymbols] = useState([])
@@ -17,6 +32,8 @@ export default function App() {
   const [period, setPeriod] = useState('5Y')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
+  const [benchmark, setBenchmark] = useState(false)
+  const [benchmarkData, setBenchmarkData] = useState(null)
 
   const fetchPrices = useCallback(
     async (syms) => {
@@ -31,7 +48,11 @@ export default function App() {
         } else {
           await Promise.all(
             missing.map(async (sym) => {
-              // 1. Try Supabase first
+              // 1. Check localStorage cache
+              const cached = getCached(sym)
+              if (cached) { results[sym] = cached; return }
+
+              // 2. Try Supabase
               const { data, error: err } = await supabase
                 .from('historical_prices')
                 .select('date, adj_close, close')
@@ -42,10 +63,11 @@ export default function App() {
 
               if (data && data.length > 0) {
                 results[sym] = data
+                setCached(sym, data)
                 return
               }
 
-              // 2. Not in DB — fetch via Edge Function
+              // 3. Not in DB — fetch via Edge Function
               setFetchingSymbol(sym)
               const { data: fnData, error: fnErr } = await supabase.functions.invoke('fetch-symbol', {
                 body: { symbol: sym },
@@ -56,7 +78,7 @@ export default function App() {
                 throw new Error(`לא נמצאו נתונים עבור "${sym}". בדוק שהסימול נכון.`)
               }
 
-              // 3. Re-fetch from Supabase after download
+              // 4. Re-fetch from Supabase after download
               const { data: fresh } = await supabase
                 .from('historical_prices')
                 .select('date, adj_close, close')
@@ -64,6 +86,7 @@ export default function App() {
                 .order('date', { ascending: true })
                 .limit(10000)
               results[sym] = fresh ?? []
+              if (fresh?.length) setCached(sym, fresh)
             })
           )
         }
@@ -90,6 +113,24 @@ export default function App() {
   function removeSymbol(sym) {
     setSymbols((prev) => prev.filter((s) => s !== sym))
     setPricesMap((prev) => { const n = { ...prev }; delete n[sym]; return n })
+  }
+
+  async function toggleBenchmark() {
+    if (benchmark) { setBenchmark(false); return }
+    if (!benchmarkData) {
+      const cached = getCached('^GSPC')
+      if (cached) { setBenchmarkData(cached); setBenchmark(true); return }
+      const { data } = await supabase
+        .from('historical_prices')
+        .select('date, adj_close, close')
+        .eq('symbol', '^GSPC')
+        .order('date', { ascending: true })
+        .limit(10000)
+      const d = data ?? []
+      setBenchmarkData(d)
+      if (d.length) setCached('^GSPC', d)
+    }
+    setBenchmark(true)
   }
 
   const isLoading = loading || !!fetchingSymbol
@@ -165,6 +206,9 @@ export default function App() {
               customEnd={customEnd}
               setCustomStart={setCustomStart}
               setCustomEnd={setCustomEnd}
+              benchmark={benchmark}
+              benchmarkData={benchmarkData}
+              onToggleBenchmark={toggleBenchmark}
             />
             <StatsTable
               symbols={symbols}

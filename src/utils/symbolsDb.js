@@ -72,7 +72,11 @@ export const SYMBOLS_DB = [
   { symbol: 'V',     name: 'Visa Inc.',                 keywords: ['visa', 'payment', 'credit card'] },
 
   // ── Israeli / Tel Aviv ───────────────────────────────────
-  { symbol: 'EIS',   name: 'iShares MSCI Israel ETF',   keywords: ['israel', 'ישראל', 'tel aviv', 'תל אביב'] },
+  { symbol: 'EIS',        name: 'iShares MSCI Israel ETF',          keywords: ['israel', 'ישראל', 'tel aviv', 'תל אביב', 'tase'] },
+  { symbol: '^TA125.TA',  name: 'תל אביב 125 – מדד הדגל',           keywords: ['תל אביב', 'ta125', 'ת"א 125', 'ישראל', 'israel', 'tase', 'בורסה'] },
+  { symbol: '^TA35.TA',   name: 'תל אביב 35 – מדד הבכורה',          keywords: ['תל אביב', 'ta35', 'ת"א 35', 'ישראל', 'israel', 'tase', 'בורסה'] },
+  { symbol: '^TA90.TA',   name: 'תל אביב 90 – מדד חברות ביניים',    keywords: ['תל אביב', 'ta90', 'ת"א 90', 'ישראל', 'tase'] },
+  { symbol: '^TELBND.TA', name: 'תל בונד – מדד אג"ח תל אביב',       keywords: ['תל בונד', 'אג"ח', 'אגח', 'telbond', 'ישראל', 'israel', 'tase'] },
 ]
 
 /**
