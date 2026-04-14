@@ -11,6 +11,7 @@ export default function App() {
   const [symbols, setSymbols] = useState([])
   const [pricesMap, setPricesMap] = useState({})
   const [loading, setLoading] = useState(false)
+  const [fetchingSymbol, setFetchingSymbol] = useState(null) // symbol being downloaded from Yahoo
   const [error, setError] = useState(null)
   const [investment, setInvestment] = useState(10000)
   const [period, setPeriod] = useState('5Y')
@@ -30,6 +31,7 @@ export default function App() {
         } else {
           await Promise.all(
             missing.map(async (sym) => {
+              // 1. Try Supabase first
               const { data, error: err } = await supabase
                 .from('historical_prices')
                 .select('date, adj_close, close')
@@ -37,7 +39,31 @@ export default function App() {
                 .order('date', { ascending: true })
                 .limit(10000)
               if (err) throw new Error(`[${sym}] ${err.message}`)
-              results[sym] = data ?? []
+
+              if (data && data.length > 0) {
+                results[sym] = data
+                return
+              }
+
+              // 2. Not in DB — fetch via Edge Function
+              setFetchingSymbol(sym)
+              const { data: fnData, error: fnErr } = await supabase.functions.invoke('fetch-symbol', {
+                body: { symbol: sym },
+              })
+              setFetchingSymbol(null)
+
+              if (fnErr || !fnData?.success) {
+                throw new Error(`לא נמצאו נתונים עבור "${sym}". בדוק שהסימול נכון.`)
+              }
+
+              // 3. Re-fetch from Supabase after download
+              const { data: fresh } = await supabase
+                .from('historical_prices')
+                .select('date, adj_close, close')
+                .eq('symbol', sym)
+                .order('date', { ascending: true })
+                .limit(10000)
+              results[sym] = fresh ?? []
             })
           )
         }
@@ -46,6 +72,7 @@ export default function App() {
         setError(e.message)
       } finally {
         setLoading(false)
+        setFetchingSymbol(null)
       }
     },
     [pricesMap]
@@ -64,6 +91,8 @@ export default function App() {
     setSymbols((prev) => prev.filter((s) => s !== sym))
     setPricesMap((prev) => { const n = { ...prev }; delete n[sym]; return n })
   }
+
+  const isLoading = loading || !!fetchingSymbol
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
@@ -115,14 +144,17 @@ export default function App() {
           </div>
         )}
 
-        {loading && (
+        {isLoading && (
           <div className="text-center text-gray-500 py-12">
             <div className="inline-block w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin mb-3" />
-            <p>טוען נתונים…</p>
+            {fetchingSymbol
+              ? <p>מוריד נתונים עבור <strong style={{ color: '#4ade80' }}>{fetchingSymbol}</strong> מ-Yahoo Finance…</p>
+              : <p>טוען נתונים…</p>
+            }
           </div>
         )}
 
-        {!loading && symbols.length > 0 && (
+        {!isLoading && symbols.length > 0 && (
           <>
             <ComparisonChart
               symbols={symbols}
@@ -145,17 +177,17 @@ export default function App() {
           </>
         )}
 
-        {!loading && symbols.length === 0 && (
+        {!isLoading && symbols.length === 0 && (
           <div className="text-center text-gray-600 py-24">
             <div className="text-5xl mb-4">📈</div>
             <p className="text-lg">הוסף סימול כדי להתחיל בניתוח</p>
-            <p className="text-sm mt-2">לדוגמה: SPY, QQQ, ^GSPC, AAPL</p>
+            <p className="text-sm mt-2">לדוגמה: SPY, QQQ, ^GSPC, AAPL, NVDA, BRK-B</p>
           </div>
         )}
       </main>
 
       <footer className="border-t border-gray-800 px-6 py-4 text-gray-600 text-xs text-center">
-        Net Profit • נתונים מ-Yahoo Finance דרך yfinance • אין בנתונים אלו המלצת השקעה
+        Net Profit • נתונים מ-Yahoo Finance • אין בנתונים אלו המלצת השקעה
       </footer>
     </div>
   )
