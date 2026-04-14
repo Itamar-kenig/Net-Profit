@@ -72,9 +72,16 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
             </tr>
           </thead>
           <tbody>
-            {symbols.map((sym, i) => {
+            {(() => {
+              // Shared start: latest first-date across all symbols for fair comparison
+              const sharedStart = symbols.reduce((latest, sym) => {
+                const p = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
+                return p.length > 0 && p[0].date > latest ? p[0].date : latest
+              }, '')
+              return symbols.map((sym, i) => {
               const raw    = pricesMap[sym] || []
               const prices = filterPrices(raw, period, customStart, customEnd)
+                .filter((p) => p.date >= sharedStart)
               const hasData = prices.length >= 2
               const cagr = hasData ? calcCAGRFromSeries(prices) : null
               const fee  = getFee(sym) ?? 0.2
@@ -125,7 +132,8 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   </td>
                 </tr>
               )
-            })}
+            })
+          })()}
           </tbody>
         </table>
       </div>
@@ -148,10 +156,15 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
               </thead>
               <tbody>
                 {(() => {
+                  const sharedStart = symbols.reduce((latest, sym) => {
+                    const p = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
+                    return p.length > 0 && p[0].date > latest ? p[0].date : latest
+                  }, '')
                   const allKeys = new Set()
                   const dataMap = {}
                   for (const sym of symbols) {
                     const filtered = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
+                      .filter((p) => p.date >= sharedStart)
                     dataMap[sym] = {}
                     if (breakdown === 'yearly') {
                       calcYearlyReturns(filtered).forEach((r) => { dataMap[sym][r.year] = r.return; allKeys.add(r.year) })

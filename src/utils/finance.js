@@ -291,7 +291,15 @@ export function calcNetProfit({ initialInvestment, grossCAGR, managementFee, yea
 export function buildChartData(symbols, pricesMap) {
   if (symbols.length === 0) return []
 
-  // Build per-symbol lookup: date string → price
+  // Find the latest start date across all symbols so comparison is fair
+  let commonStart = ''
+  for (const sym of symbols) {
+    const prices = pricesMap[sym]
+    if (!prices || prices.length === 0) continue
+    if (prices[0].date > commonStart) commonStart = prices[0].date
+  }
+
+  // Build per-symbol lookup: date string → price (only from commonStart onwards)
   const lookups = {}
   const bases = {}
 
@@ -300,15 +308,17 @@ export function buildChartData(symbols, pricesMap) {
     if (!prices || prices.length === 0) continue
     lookups[sym] = {}
     for (const p of prices) {
-      lookups[sym][p.date] = price(p)
+      if (p.date >= commonStart) lookups[sym][p.date] = price(p)
     }
-    bases[sym] = price(prices[0])
+    // Base = first price on or after commonStart
+    const firstP = prices.find((p) => p.date >= commonStart)
+    bases[sym] = firstP ? price(firstP) : price(prices[0])
   }
 
-  // Collect all dates, then downsample: keep first trading day of each month
+  // Collect all dates >= commonStart, then downsample: keep first trading day of each month
   const allDates = new Set()
   for (const sym of symbols) {
-    if (pricesMap[sym]) pricesMap[sym].forEach((p) => allDates.add(p.date))
+    if (pricesMap[sym]) pricesMap[sym].forEach((p) => { if (p.date >= commonStart) allDates.add(p.date) })
   }
 
   const sorted = Array.from(allDates).sort()
