@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  calcCAGRFromSeries, calcYTD, calcNetProfit,
+  calcCAGRFromSeries, calcNetProfit,
   getFee, filterPrices, calcYearlyReturns, calcMonthlyReturns,
 } from '../utils/finance'
 
@@ -34,17 +34,7 @@ function getActualYears(prices) {
 }
 
 export default function StatsTable({ symbols, pricesMap, investment, period, customStart, customEnd }) {
-  const [fees, setFees] = useState(() => {
-    const init = {}
-    for (const sym of symbols) init[sym] = getFee(sym) ?? 0.2
-    return init
-  })
   const [breakdown, setBreakdown] = useState(null) // null | 'yearly' | 'monthly'
-
-  for (const sym of symbols) {
-    if (fees[sym] === undefined)
-      setTimeout(() => setFees((prev) => ({ ...prev, [sym]: getFee(sym) ?? 0.2 })), 0)
-  }
 
   const cell = { padding: '10px 14px', fontSize: 13 }
   const th = { ...cell, color: '#6b7280', fontWeight: 500, borderBottom: '1px solid #1f2937', textAlign: 'right' }
@@ -87,8 +77,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
               const prices = filterPrices(raw, period, customStart, customEnd)
               const hasData = prices.length >= 2
               const cagr = hasData ? calcCAGRFromSeries(prices) : null
-              const ytd  = hasData ? calcYTD(raw) : null
-              const fee  = fees[sym] ?? 0
+              const fee  = getFee(sym) ?? 0.2
               const years = hasData ? getActualYears(prices) : null
               const net  = hasData && cagr !== null && years
                 ? calcNetProfit({ initialInvestment: investment, grossCAGR: cagr, managementFee: fee, years })
@@ -116,15 +105,8 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(totalReturn ?? 0) }}>
                     {totalReturn !== null ? `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn)}%` : '–'}
                   </td>
-                  <td style={cell}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <input type="number" min="0" max="5" step="0.01" value={fee}
-                        onChange={(e) => setFees((prev) => ({ ...prev, [sym]: Number(e.target.value) }))}
-                        style={{ width: 64, background: '#1f2937', border: '1px solid #374151', borderRadius: 4,
-                          padding: '2px 6px', color: 'white', fontFamily: 'monospace', fontSize: 12, textAlign: 'right' }}
-                      />
-                      <span style={{ color: '#6b7280' }}>%</span>
-                    </div>
+                  <td style={{ ...cell, fontFamily: 'monospace', color: '#9ca3af' }}>
+                    {fmt(fee)}%
                   </td>
                   <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(cagr ?? 0) }}>
                     {cagr !== null ? `${cagr >= 0 ? '+' : ''}${fmt(cagr)}%` : '–'}

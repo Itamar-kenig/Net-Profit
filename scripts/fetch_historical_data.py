@@ -101,8 +101,8 @@ SYMBOLS = [
     "V",       # Visa
 ]
 
-# At least 20 years back
-START_DATE = "2000-01-01"
+# Maximum historical data available from Yahoo Finance
+START_DATE = "1970-01-01"
 END_DATE = datetime.today().strftime("%Y-%m-%d")
 
 # Supabase batch size (rows per upsert call – keep under 1000)
