@@ -52,16 +52,53 @@ if not SUPABASE_URL or not SUPABASE_KEY:
 
 # Symbols to fetch.  Add/remove as needed.
 SYMBOLS = [
+    # Indices
     "^GSPC",   # S&P 500
     "^IXIC",   # NASDAQ Composite
     "^DJI",    # Dow Jones Industrial Average
     "^RUT",    # Russell 2000
-    "SPY",     # S&P 500 ETF
-    "QQQ",     # NASDAQ 100 ETF
+    # S&P 500 ETFs
+    "SPY",     # SPDR S&P 500 ETF
     "VOO",     # Vanguard S&P 500 ETF
+    "IVV",     # iShares Core S&P 500 ETF
+    "SPLG",    # SPDR Portfolio S&P 500
+    # NASDAQ ETFs
+    "QQQ",     # NASDAQ 100 ETF
+    "QQQM",    # NASDAQ 100 ETF Mini
+    # Total Market
     "VTI",     # Vanguard Total Market ETF
-    "GLD",     # Gold ETF
+    # Small Cap
+    "IWM",     # iShares Russell 2000 ETF
+    # International
+    "EFA",     # iShares MSCI EAFE
+    "VEA",     # Vanguard Developed Markets
+    "EEM",     # iShares Emerging Markets
+    "VWO",     # Vanguard Emerging Markets
+    # Bonds
     "AGG",     # US Bond Aggregate ETF
+    "BND",     # Vanguard Total Bond
+    "TLT",     # iShares 20+ Year Treasury
+    # Commodities
+    "GLD",     # Gold ETF
+    "IAU",     # iShares Gold Trust
+    "SLV",     # Silver ETF
+    # Sector ETFs
+    "XLK",     # Technology
+    "XLE",     # Energy
+    "XLF",     # Financials
+    "XLV",     # Healthcare
+    "VNQ",     # Real Estate
+    # Popular Stocks
+    "AAPL",    # Apple
+    "MSFT",    # Microsoft
+    "GOOGL",   # Alphabet
+    "AMZN",    # Amazon
+    "NVDA",    # NVIDIA
+    "TSLA",    # Tesla
+    "META",    # Meta
+    "JPM",     # JPMorgan
+    "BRK-B",   # Berkshire Hathaway B
+    "V",       # Visa
 ]
 
 # At least 20 years back
