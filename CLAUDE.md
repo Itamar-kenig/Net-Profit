@@ -25,7 +25,7 @@
 | `src/lib/supabase.js` | יצירת Supabase client (עם fallback credentials מקודדים לבולט) |
 | `src/utils/finance.js` | כל הלוגיקה הפיננסית |
 | `src/utils/mockData.js` | נתוני demo כשאין Supabase |
-| `src/utils/symbolsDb.js` | מאגר ~50 סימולים עם מילות חיפוש בעברית ואנגלית |
+| `src/utils/symbolsDb.js` | מאגר ~55 סימולים כולל מדדים ישראליים, עם מילות חיפוש בעברית ואנגלית |
 
 ### קומפוננטות
 
@@ -47,6 +47,14 @@
 - ברירת מחדל: `['^GSPC', '^IXIC', '^DJI', 'SPY', 'QQQ', 'VOO', 'GLD']`
 - שמורים ב-`localStorage` תחת מפתח `np-quick`
 - ניתן להוסיף/להסיר דרך ה-UI
+
+### Cache (localStorage)
+נתונים שנטענו מ-Supabase נשמרים ב-`localStorage` עם TTL של 4 שעות (מפתח: `np-prices-{sym}`).
+בריענון דף הנתונים נטענים מהcache ללא קריאה חוזרת ל-Supabase.
+
+### Benchmark (S&P 500)
+כפתור `⚖ S&P 500` בתפריט התקופות מוסיף קו benchmark מקווקו אפור לגרף.
+הנתונים נטענים בנפרד ב-`App.jsx` (לא נכנסים ל-StatsTable).
 
 ### Demo Mode
 כשאין `VITE_SUPABASE_URL` אמיתי — `isDemoMode()` מחזיר `true` ו-`App.jsx` טוען נתונים מ-`mockData.js` (Geometric Brownian Motion).
@@ -154,6 +162,10 @@ feeCost    = grossValue - netValue
 **תשואות שנתיות/חודשיות:** ניתן לפתוח breakdowns מפורטים דרך כפתורים בכותרת הטבלה.
 
 **תאריך התחלה משותף:** כשמשווים מספר סימולים, כל החישובים מתחילים מתאריך ההנפקה של הסימול **המאוחר ביותר** (השוואה הוגנת).
+
+**מדדים ישראליים זמינים בחיפוש:** `^TA125.TA`, `^TA35.TA`, `^TA90.TA`, `^TELBND.TA`, `EIS`
+
+**Benchmark:** כפתור `⚖ S&P 500` בגרף מוסיף קו אפור מקווקו של `^GSPC` להשוואה ויזואלית ללא השפעה על הטבלה.
 
 ---
 
