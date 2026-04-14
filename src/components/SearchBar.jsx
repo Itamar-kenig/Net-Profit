@@ -149,16 +149,17 @@ export default function SearchBar({ onAdd }) {
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8, alignItems: 'center' }}>
         <span style={{ color: '#6b7280', fontSize: 12 }}>מהיר:</span>
         {quickSymbols.map((sym) => (
-          <span key={sym} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <span key={sym} style={{
+            display: 'inline-flex', alignItems: 'center',
+            background: '#1f2937', border: '1px solid #374151', borderRadius: 20, overflow: 'hidden',
+          }}>
             <button onClick={() => onAdd(sym)} style={{
-              fontSize: 12, background: '#1f2937', color: '#9ca3af',
-              padding: '3px 10px', borderRadius: '20px 0 0 20px', border: '1px solid #374151',
-              borderRight: 'none', cursor: 'pointer',
+              fontSize: 12, color: '#9ca3af', background: 'transparent',
+              padding: '3px 8px 3px 10px', border: 'none', cursor: 'pointer',
             }}>{sym}</button>
-            <button onClick={() => removeFromQuick(sym)} title="הסר מהרשימה המהירה" style={{
-              fontSize: 11, background: '#1f2937', color: '#6b7280',
-              padding: '3px 6px', borderRadius: '0 20px 20px 0', border: '1px solid #374151',
-              borderLeft: '1px solid #4b5563', cursor: 'pointer', lineHeight: 1,
+            <button onClick={() => removeFromQuick(sym)} title="הסר" style={{
+              fontSize: 12, color: '#6b7280', background: 'transparent',
+              padding: '3px 8px 3px 4px', border: 'none', cursor: 'pointer', lineHeight: 1,
             }}>×</button>
           </span>
         ))}
