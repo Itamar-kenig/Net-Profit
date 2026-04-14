@@ -76,7 +76,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr>
-              {['סימול', 'תשואה כוללת', 'CAGR ברוטו', 'YTD', 'דמי ניהול %', 'CAGR נטו', 'רווח ברוטו', 'רווח נקי', 'עלות דמי'].map((h) => (
+              {['סימול', 'תשואה כוללת', 'CAGR ברוטו', 'דמי ניהול %', 'CAGR נטו', 'רווח ברוטו', 'רווח נקי', 'עלות דמי'].map((h) => (
                 <th key={h} style={th}>{h}</th>
               ))}
             </tr>
@@ -112,9 +112,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(cagr ?? 0) }}>
                     {cagr !== null ? `${cagr >= 0 ? '+' : ''}${fmt(cagr)}%` : '–'}
                   </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(ytd ?? 0) }}>
-                    {ytd !== null ? `${ytd >= 0 ? '+' : ''}${fmt(ytd)}%` : '–'}
-                  </td>
+
                   <td style={cell}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <input type="number" min="0" max="5" step="0.01" value={fee}
