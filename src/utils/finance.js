@@ -76,6 +76,27 @@ export function calcYearlyReturns(prices) {
   }).filter(Boolean)
 }
 
+/**
+ * Returns monthly return for each calendar month in the price series.
+ */
+export function calcMonthlyReturns(prices) {
+  if (!prices || prices.length < 2) return []
+  const byMonth = {}
+  for (const p of prices) {
+    const ym = p.date.slice(0, 7) // "YYYY-MM"
+    byMonth[ym] = p               // keep last price of each month
+  }
+  const months = Object.keys(byMonth).sort()
+  const results = []
+  for (let i = 1; i < months.length; i++) {
+    const s = price(byMonth[months[i - 1]])
+    const e = price(byMonth[months[i]])
+    if (!s || !e) continue
+    results.push({ month: months[i], return: Number((((e - s) / s) * 100).toFixed(2)) })
+  }
+  return results
+}
+
 // ---------------------------------------------------------------------------
 // Known annual management fees (%) for common ETFs / indices
 // Index symbols have no fee because they are theoretical benchmarks.
