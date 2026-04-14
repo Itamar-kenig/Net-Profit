@@ -125,7 +125,9 @@ def fetch_symbol(symbol: str) -> pd.DataFrame:
     """Download OHLCV data for a single symbol using yfinance."""
     log.info(f"Fetching {symbol} from {START_DATE} to {END_DATE} …")
     ticker = yf.Ticker(symbol)
-    df = ticker.history(start=START_DATE, end=END_DATE, auto_adjust=False)
+    # auto_adjust=True: "Close" = split+dividend adjusted price (total return).
+    # Newer yfinance (1.x) does not reliably return "Adj Close" with auto_adjust=False.
+    df = ticker.history(start=START_DATE, end=END_DATE, auto_adjust=True)
 
     if df.empty:
         log.warning(f"No data returned for {symbol}")
@@ -140,10 +142,12 @@ def fetch_symbol(symbol: str) -> pd.DataFrame:
             "Low": "low",
             "Close": "close",
             "Volume": "volume",
-            "Adj Close": "adj_close",
         },
         inplace=True,
     )
+
+    # adj_close = close (both are the dividend-adjusted total-return price)
+    df["adj_close"] = df["close"]
 
     # Keep only the columns we need
     cols = [c for c in ["date", "open", "high", "low", "close", "volume", "adj_close"] if c in df.columns]
