@@ -76,7 +76,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr>
-              {['סימול', 'תשואה כוללת', 'CAGR ברוטו', 'דמי ניהול %', 'CAGR נטו', 'רווח ברוטו', 'רווח נקי', 'עלות דמי'].map((h) => (
+              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול'].map((h) => (
                 <th key={h} style={th}>{h}</th>
               ))}
             </tr>
@@ -93,9 +93,13 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
               const net  = hasData && cagr !== null && years
                 ? calcNetProfit({ initialInvestment: investment, grossCAGR: cagr, managementFee: fee, years })
                 : null
-              const p = (r) => r.adj_close ?? r.close
+              const pAdj = (r) => r.adj_close ?? r.close
+              const pClose = (r) => r.close
+              const priceReturn = hasData
+                ? Number((((pClose(prices[prices.length - 1]) - pClose(prices[0])) / pClose(prices[0])) * 100).toFixed(2))
+                : null
               const totalReturn = hasData
-                ? Number((((p(prices[prices.length - 1]) - p(prices[0])) / p(prices[0])) * 100).toFixed(2))
+                ? Number((((pAdj(prices[prices.length - 1]) - pAdj(prices[0])) / pAdj(prices[0])) * 100).toFixed(2))
                 : null
 
               return (
@@ -106,13 +110,12 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                       <span style={{ color: 'white', fontWeight: 600 }}>{sym}</span>
                     </div>
                   </td>
+                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(priceReturn ?? 0) }}>
+                    {priceReturn !== null ? `${priceReturn >= 0 ? '+' : ''}${fmt(priceReturn)}%` : '–'}
+                  </td>
                   <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(totalReturn ?? 0) }}>
                     {totalReturn !== null ? `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn)}%` : '–'}
                   </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(cagr ?? 0) }}>
-                    {cagr !== null ? `${cagr >= 0 ? '+' : ''}${fmt(cagr)}%` : '–'}
-                  </td>
-
                   <td style={cell}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <input type="number" min="0" max="5" step="0.01" value={fee}
@@ -122,6 +125,9 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                       />
                       <span style={{ color: '#6b7280' }}>%</span>
                     </div>
+                  </td>
+                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(cagr ?? 0) }}>
+                    {cagr !== null ? `${cagr >= 0 ? '+' : ''}${fmt(cagr)}%` : '–'}
                   </td>
                   <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.netCAGR ?? 0) }}>
                     {net ? `${net.netCAGR >= 0 ? '+' : ''}${fmt(net.netCAGR)}%` : '–'}
