@@ -321,6 +321,11 @@ export function buildChartData(symbols, pricesMap) {
       lastMonth = ym
     }
   }
+  // Always include the latest actual date so the chart endpoint matches the table
+  const latestDate = sorted[sorted.length - 1]
+  if (monthly.length > 0 && monthly[monthly.length - 1] !== latestDate) {
+    monthly.push(latestDate)
+  }
 
   return monthly.map((date) => {
     const point = { date }
