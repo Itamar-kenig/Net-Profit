@@ -7,6 +7,7 @@ import StatsTable from './components/StatsTable'
 
 const DEMO = isDemoMode()
 const CACHE_TTL = 4 * 60 * 60 * 1000 // 4 hours
+const STALE_THRESHOLD_DAYS = 7 // data older than 7 days triggers a refresh
 
 function getCached(sym) {
   try {
@@ -20,6 +21,13 @@ function getCached(sym) {
 
 function setCached(sym, data) {
   try { localStorage.setItem(`np-prices-${sym}`, JSON.stringify({ data, ts: Date.now() })) } catch {}
+}
+
+function isDataStale(data) {
+  if (!data || data.length === 0) return true
+  const lastDate = new Date(data[data.length - 1].date)
+  const daysSince = (Date.now() - lastDate.getTime()) / (24 * 60 * 60 * 1000)
+  return daysSince > STALE_THRESHOLD_DAYS
 }
 
 export default function App() {
@@ -48,9 +56,11 @@ export default function App() {
         } else {
           await Promise.all(
             missing.map(async (sym) => {
-              // 1. Check localStorage cache
+              // 1. Check localStorage cache (skip if stale)
               const cached = getCached(sym)
-              if (cached) { results[sym] = cached; return }
+              if (cached && !isDataStale(cached)) { results[sym] = cached; return }
+              // If stale cache exists, clear it so fresh data gets stored
+              if (cached) localStorage.removeItem(`np-prices-${sym}`)
 
               // 2. Try Supabase
               const { data, error: err } = await supabase
@@ -61,13 +71,33 @@ export default function App() {
                 .limit(10000)
               if (err) throw new Error(`[${sym}] ${err.message}`)
 
+              // 3. If data exists but is stale, refresh via Edge Function
+              if (data && data.length > 0 && isDataStale(data)) {
+                setFetchingSymbol(sym)
+                try {
+                  await supabase.functions.invoke('fetch-symbol', { body: { symbol: sym } })
+                } catch (_) { /* refresh failed – fall through to use existing data */ }
+                setFetchingSymbol(null)
+
+                const { data: refreshed } = await supabase
+                  .from('historical_prices')
+                  .select('date, adj_close, close')
+                  .eq('symbol', sym)
+                  .order('date', { ascending: true })
+                  .limit(10000)
+                const best = (refreshed && refreshed.length > 0) ? refreshed : data
+                results[sym] = best
+                if (best.length) setCached(sym, best)
+                return
+              }
+
               if (data && data.length > 0) {
                 results[sym] = data
                 setCached(sym, data)
                 return
               }
 
-              // 3. Not in DB — fetch via Edge Function
+              // 4. Not in DB — fetch via Edge Function
               setFetchingSymbol(sym)
               const { data: fnData, error: fnErr } = await supabase.functions.invoke('fetch-symbol', {
                 body: { symbol: sym },
@@ -78,7 +108,7 @@ export default function App() {
                 throw new Error(`לא נמצאו נתונים עבור "${sym}". בדוק שהסימול נכון.`)
               }
 
-              // 4. Re-fetch from Supabase after download
+              // 5. Re-fetch from Supabase after download
               const { data: fresh } = await supabase
                 .from('historical_prices')
                 .select('date, adj_close, close')
@@ -119,7 +149,8 @@ export default function App() {
     if (benchmark) { setBenchmark(false); return }
     if (!benchmarkData) {
       const cached = getCached('^GSPC')
-      if (cached) { setBenchmarkData(cached); setBenchmark(true); return }
+      if (cached && !isDataStale(cached)) { setBenchmarkData(cached); setBenchmark(true); return }
+      if (cached) localStorage.removeItem('np-prices-^GSPC')
       const { data } = await supabase
         .from('historical_prices')
         .select('date, adj_close, close')
