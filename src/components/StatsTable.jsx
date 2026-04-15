@@ -68,7 +68,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr>
-              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול'].map((h, i) => (
+              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול'].map((h, i) => (
                 <th key={h} style={i === 0 ? stickyTh : th}>{h}</th>
               ))}
             </tr>
@@ -99,6 +99,9 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
               const totalReturn = hasData
                 ? Number((((pAdj(prices[prices.length - 1]) - pAdj(prices[0])) / pAdj(prices[0])) * 100).toFixed(2))
                 : null
+              const currentValue = totalReturn !== null
+                ? investment * (1 + totalReturn / 100)
+                : null
 
               return (
                 <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>
@@ -122,6 +125,9 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   </td>
                   <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.netCAGR ?? 0) }}>
                     {net ? `${net.netCAGR >= 0 ? '+' : ''}${fmt(net.netCAGR)}%` : '–'}
+                  </td>
+                  <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, color: '#e5e7eb' }}>
+                    {currentValue !== null ? fmtCurrency(currentValue) : '–'}
                   </td>
                   <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.grossProfit ?? 0) }}>
                     {net ? fmtCurrency(net.grossProfit) : '–'}

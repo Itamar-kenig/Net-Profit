@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
@@ -11,20 +12,31 @@ function formatDate(dateStr) {
   return `${d.getMonth() + 1}/${d.getFullYear()}`
 }
 
-function CustomTooltip({ active, payload, label }) {
+function fmtUSD(n) {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+}
+
+function CustomTooltip({ active, payload, label, investment, showDollar }) {
   if (!active || !payload || payload.length === 0) return null
   return (
     <div style={{ background:'#111827', border:'1px solid #374151', borderRadius:8, padding:'10px 14px', fontSize:13 }}>
       <p style={{ color:'#9ca3af', marginBottom:6 }}>{label}</p>
-      {payload.map((entry) => (
-        <div key={entry.dataKey} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:2 }}>
-          <span style={{ width:8, height:8, borderRadius:'50%', background:entry.color, display:'inline-block' }} />
-          <span style={{ color:'#d1d5db' }}>{entry.dataKey}:</span>
-          <span style={{ color:entry.color, fontWeight:600 }}>
-            {entry.value >= 0 ? '+' : ''}{entry.value?.toFixed(1)}%
-          </span>
-        </div>
-      ))}
+      {payload.map((entry) => {
+        const pct = entry.value
+        const val = investment * (1 + pct / 100)
+        return (
+          <div key={entry.dataKey} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:2 }}>
+            <span style={{ width:8, height:8, borderRadius:'50%', background:entry.color, display:'inline-block' }} />
+            <span style={{ color:'#d1d5db' }}>{entry.dataKey}:</span>
+            <span style={{ color:entry.color, fontWeight:600 }}>
+              {showDollar ? fmtUSD(val) : `${pct >= 0 ? '+' : ''}${pct?.toFixed(1)}%`}
+            </span>
+            {showDollar && (
+              <span style={{ color:'#6b7280', fontSize:11 }}>({pct >= 0 ? '+' : ''}{pct?.toFixed(1)}%)</span>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -32,10 +44,11 @@ function CustomTooltip({ active, payload, label }) {
 const BENCHMARK_SYM = '^GSPC'
 
 export default function ComparisonChart({
-  symbols, pricesMap, period, setPeriod,
+  symbols, pricesMap, investment, period, setPeriod,
   customStart, customEnd, setCustomStart, setCustomEnd,
   benchmark, benchmarkData, onToggleBenchmark,
 }) {
+  const [showDollar, setShowDollar] = useState(false)
   const filteredMap = {}
   for (const sym of symbols) {
     filteredMap[sym] = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
@@ -79,6 +92,18 @@ export default function ComparisonChart({
             }}
           >
             תאריך מותאם
+          </button>
+          {/* Dollar / % toggle */}
+          <button
+            onClick={() => setShowDollar((d) => !d)}
+            style={{
+              padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+              background: showDollar ? '#1e3a5f' : '#1f2937',
+              color: showDollar ? '#60a5fa' : '#6b7280',
+              border: showDollar ? '1px solid #3b82f6' : '1px solid #374151',
+            }}
+          >
+            {showDollar ? '$ ←→ %' : '$ ←→ %'}
           </button>
           {/* Benchmark toggle */}
           {onToggleBenchmark && (
@@ -129,8 +154,11 @@ export default function ComparisonChart({
             <LineChart data={chartData} margin={{ top:5, right:20, left:10, bottom:5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
               <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fill:'#6b7280', fontSize:11 }} interval="preserveStartEnd" minTickGap={60} />
-              <YAxis tickFormatter={(v) => `${v >= 0 ? '+' : ''}${v}%`} tick={{ fill:'#6b7280', fontSize:11 }} width={65} />
-              <Tooltip content={<CustomTooltip />} />
+              <YAxis
+                tickFormatter={(v) => showDollar ? fmtUSD(investment * (1 + v / 100)) : `${v >= 0 ? '+' : ''}${v}%`}
+                tick={{ fill:'#6b7280', fontSize:11 }} width={75}
+              />
+              <Tooltip content={<CustomTooltip investment={investment} showDollar={showDollar} />} />
               <Legend formatter={(value) => <span style={{ color:'#d1d5db', fontSize:13 }}>{value}</span>} />
               <ReferenceLine y={0} stroke="#374151" strokeDasharray="4 4" />
               {symbols.map((sym, i) => (

@@ -28,7 +28,7 @@ export default function App() {
   const [loading, setLoading] = useState(false)
   const [fetchingSymbol, setFetchingSymbol] = useState(null) // symbol being downloaded from Yahoo
   const [error, setError] = useState(null)
-  const [investment, setInvestment] = useState(10000)
+  const [investment, setInvestment] = useState(100)
   const [period, setPeriod] = useState('5Y')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
@@ -200,6 +200,7 @@ export default function App() {
             <ComparisonChart
               symbols={symbols}
               pricesMap={pricesMap}
+              investment={investment}
               period={period}
               setPeriod={setPeriod}
               customStart={customStart}
