@@ -39,9 +39,16 @@
 1. משתמש מוסיף סימול דרך `SearchBar` (autocomplete מ-`symbolsDb.js`)
 2. `App.jsx` שולח query ל-Supabase: `SELECT date, adj_close, close FROM historical_prices WHERE symbol = '...'`
 3. אם הסימול לא קיים ב-DB — קריאה ל-Edge Function `fetch-symbol` שמושכת מ-Yahoo Finance ושומרת ב-Supabase
-4. הנתונים עוברים ל-`finance.js` לחישוב CAGR / Net Profit
-5. `buildChartData()` ממזג סדרות מרובות ל-format של Recharts (downsampling חודשי + נקודה אחרונה תמיד)
-6. `ComparisonChart` ו-`StatsTable` מציגים את התוצאות
+4. אם הנתונים קיימים אך ישנים (>7 ימים) — Edge Function מופעלת אוטומטית לרענון לפני הצגה
+5. הנתונים עוברים ל-`finance.js` לחישוב CAGR / Net Profit
+6. `buildChartData()` ממזג סדרות מרובות ל-format של Recharts (downsampling חודשי + נקודה אחרונה תמיד)
+7. `ComparisonChart` ו-`StatsTable` מציגים את התוצאות
+
+### Stale Data Detection (`src/App.jsx`)
+- `STALE_THRESHOLD_DAYS = 7` — אם הנתון האחרון ב-DB ישן מ-7 ימים, הנתונים נחשבים ישנים
+- `isDataStale(data)` — בודק את תאריך השורה האחרונה בסדרה
+- בטעינה: cache ישן ב-localStorage נמחק → Supabase נבדק → אם ישן, Edge Function מרענת לפני הצגה
+- Fallback: אם הרענון נכשל, הנתונים הישנים מוצגים בלי קריסה
 
 ### Quick Symbols (localStorage)
 - ברירת מחדל: `['^GSPC', '^IXIC', '^DJI', 'SPY', 'QQQ', 'VOO', 'GLD']`
