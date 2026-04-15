@@ -68,7 +68,7 @@ export default function App() {
                 .select('date, adj_close, close')
                 .eq('symbol', sym)
                 .order('date', { ascending: true })
-                .limit(10000)
+                .limit(20000)
               if (err) throw new Error(`[${sym}] ${err.message}`)
 
               // 3. If data exists but is stale, refresh via Edge Function
@@ -84,7 +84,7 @@ export default function App() {
                   .select('date, adj_close, close')
                   .eq('symbol', sym)
                   .order('date', { ascending: true })
-                  .limit(10000)
+                  .limit(20000)
                 const best = (refreshed && refreshed.length > 0) ? refreshed : data
                 results[sym] = best
                 if (best.length) setCached(sym, best)
@@ -114,7 +114,7 @@ export default function App() {
                 .select('date, adj_close, close')
                 .eq('symbol', sym)
                 .order('date', { ascending: true })
-                .limit(10000)
+                .limit(20000)
               results[sym] = fresh ?? []
               if (fresh?.length) setCached(sym, fresh)
             })
@@ -156,7 +156,7 @@ export default function App() {
         .select('date, adj_close, close')
         .eq('symbol', '^GSPC')
         .order('date', { ascending: true })
-        .limit(10000)
+        .limit(20000)
       const d = data ?? []
       setBenchmarkData(d)
       if (d.length) setCached('^GSPC', d)
