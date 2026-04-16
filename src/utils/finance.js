@@ -103,31 +103,44 @@ export function calcMonthlyReturns(prices) {
 // ---------------------------------------------------------------------------
 export const KNOWN_FEES = {
   // US broad market
-  SPY: 0.0945,
-  IVV: 0.03,
-  VOO: 0.03,
-  VTI: 0.03,
+  SPY: 0.0945, IVV: 0.03, VOO: 0.03, VTI: 0.03, SPLG: 0.02, ITOT: 0.03,
   // NASDAQ
-  QQQ: 0.2,
-  QQQM: 0.15,
-  // International
-  EFA: 0.32,
-  EEM: 0.68,
-  VEA: 0.05,
-  VWO: 0.08,
+  QQQ: 0.2, QQQM: 0.15, ONEQ: 0.21,
+  // Small cap
+  IWM: 0.19, VB: 0.05,
+  // International broad
+  EFA: 0.32, EEM: 0.68, VEA: 0.05, VWO: 0.08, VXUS: 0.07,
+  // Global
+  ACWI: 0.32, VT: 0.07,
+  // Europe broad
+  VGK: 0.11, IEV: 0.59, FEZ: 0.29,
+  // Europe – countries
+  EWG: 0.50, EWQ: 0.50, EWU: 0.50, EWI: 0.50, EWP: 0.50,
+  EWL: 0.50, EWN: 0.50, EWD: 0.50,
+  // Japan
+  EWJ: 0.50, DXJ: 0.48,
+  // China
+  MCHI: 0.58, FXI: 0.74, KWEB: 0.70,
+  // Asia / other
+  INDA: 0.65, INDY: 0.68, EWY: 0.57, EWT: 0.57, EWA: 0.50, EWC: 0.50,
+  EWZ: 0.58,
+  // Sector
+  XLK: 0.09, VGT: 0.10, XLE: 0.09, XLF: 0.09, XLV: 0.09, XLY: 0.09,
+  VNQ: 0.12, GDX: 0.51,
   // Fixed income
-  AGG: 0.03,
-  BND: 0.03,
+  AGG: 0.03, BND: 0.03, TLT: 0.15, IEF: 0.15, SHY: 0.15,
   // Commodities
-  GLD: 0.4,
-  SLV: 0.5,
+  GLD: 0.40, IAU: 0.25, SLV: 0.50,
+  // DIA
+  DIA: 0.16,
+  // Stocks – no management fee
+  AAPL: 0, MSFT: 0, GOOGL: 0, AMZN: 0, NVDA: 0, TSLA: 0,
+  META: 0, 'BRK-B': 0, JPM: 0, V: 0,
   // Index benchmarks – no fee
-  '^GSPC': 0,
-  '^IXIC': 0,
-  '^DJI': 0,
-  '^RUT': 0,
-  '^FTSE': 0,
-  '^N225': 0,
+  '^GSPC': 0, '^IXIC': 0, '^DJI': 0, '^RUT': 0,
+  '^FTSE': 0, '^GDAXI': 0, '^FCHI': 0, '^STOXX50E': 0,
+  '^N225': 0, '^HSI': 0, '^BSESN': 0, '^KS11': 0, '^AXJO': 0,
+  '^TA125.TA': 0, '^TA35.TA': 0, '^TA90.TA': 0, '^TELBND.TA': 0,
 }
 
 /**

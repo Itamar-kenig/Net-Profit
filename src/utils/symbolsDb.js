@@ -46,7 +46,7 @@ export const SYMBOLS_DB = [
   { symbol: 'VB',    name: 'Vanguard Small-Cap ETF',
     keywords: ['small cap', 'חברות קטנות', 'vanguard', 'ואנגארד', 'קרן סל'] },
 
-  // ── International ────────────────────────────────────────
+  // ── International broad ──────────────────────────────────
   { symbol: 'EFA',   name: 'iShares MSCI EAFE ETF',
     keywords: ['international', 'europe', 'אירופה', 'בינלאומי', 'developed', 'מפותחות', 'eafe', 'ishares', 'קרן סל'] },
   { symbol: 'VEA',   name: 'Vanguard Developed Markets ETF',
@@ -57,6 +57,88 @@ export const SYMBOLS_DB = [
     keywords: ['emerging', 'מתפתח', 'שווקים מתפתחים', 'china', 'סין', 'ishares', 'קרן סל'] },
   { symbol: 'VWO',   name: 'Vanguard Emerging Markets ETF',
     keywords: ['emerging', 'מתפתח', 'שווקים מתפתחים', 'vanguard', 'ואנגארד', 'קרן סל'] },
+  { symbol: 'ACWI',  name: 'iShares MSCI ACWI ETF – כל העולם',
+    keywords: ['global', 'world', 'עולם', 'גלובלי', 'all world', 'כל העולם', 'acwi', 'ishares', 'קרן סל'] },
+  { symbol: 'VT',    name: 'Vanguard Total World Stock ETF',
+    keywords: ['global', 'world', 'עולם', 'גלובלי', 'all world', 'כל העולם', 'vanguard', 'ואנגארד', 'קרן סל'] },
+
+  // ── Europe broad ─────────────────────────────────────────
+  { symbol: '^STOXX50E', name: 'Euro Stoxx 50 – מדד אירופה',
+    keywords: ['europe', 'אירופה', 'european', 'stoxx', 'euro stoxx', 'stoxx 50', 'מדד אירופי', 'index', 'מדד'] },
+  { symbol: 'VGK',   name: 'Vanguard FTSE Europe ETF',
+    keywords: ['europe', 'אירופה', 'european', 'vanguard', 'ואנגארד', 'ftse europe', 'קרן סל'] },
+  { symbol: 'IEV',   name: 'iShares Europe ETF',
+    keywords: ['europe', 'אירופה', 'european', 'ishares', 'קרן סל'] },
+  { symbol: 'FEZ',   name: 'SPDR Euro Stoxx 50 ETF',
+    keywords: ['europe', 'אירופה', 'european', 'stoxx 50', 'euro stoxx', 'spdr', 'קרן סל'] },
+
+  // ── Europe – countries ───────────────────────────────────
+  { symbol: '^GDAXI', name: 'DAX – מדד גרמניה',
+    keywords: ['germany', 'גרמניה', 'german', 'deutsch', 'dax', 'דאקס', 'frankfurter', 'מדד', 'index'] },
+  { symbol: 'EWG',   name: 'iShares MSCI Germany ETF',
+    keywords: ['germany', 'גרמניה', 'german', 'deutsch', 'dax', 'דאקס', 'ishares', 'קרן סל'] },
+  { symbol: '^FCHI', name: 'CAC 40 – מדד צרפת',
+    keywords: ['france', 'צרפת', 'french', 'cac', 'קאק', 'cac 40', 'פריז', 'paris', 'מדד', 'index'] },
+  { symbol: 'EWQ',   name: 'iShares MSCI France ETF',
+    keywords: ['france', 'צרפת', 'french', 'cac', 'קאק', 'ishares', 'קרן סל'] },
+  { symbol: '^FTSE', name: 'FTSE 100 – מדד בריטניה',
+    keywords: ['uk', 'britain', 'england', 'בריטניה', 'אנגליה', 'ftse', 'ftse 100', 'לונדון', 'london', 'מדד', 'index'] },
+  { symbol: 'EWU',   name: 'iShares MSCI United Kingdom ETF',
+    keywords: ['uk', 'britain', 'england', 'בריטניה', 'אנגליה', 'ftse', 'לונדון', 'london', 'ishares', 'קרן סל'] },
+  { symbol: 'EWI',   name: 'iShares MSCI Italy ETF',
+    keywords: ['italy', 'איטליה', 'italian', 'ishares', 'קרן סל'] },
+  { symbol: 'EWP',   name: 'iShares MSCI Spain ETF',
+    keywords: ['spain', 'ספרד', 'spanish', 'ibex', 'ishares', 'קרן סל'] },
+  { symbol: 'EWL',   name: 'iShares MSCI Switzerland ETF',
+    keywords: ['switzerland', 'שוויץ', 'swiss', 'ishares', 'קרן סל'] },
+  { symbol: 'EWN',   name: 'iShares MSCI Netherlands ETF',
+    keywords: ['netherlands', 'holland', 'הולנד', 'dutch', 'amsterdam', 'ishares', 'קרן סל'] },
+  { symbol: 'EWD',   name: 'iShares MSCI Sweden ETF',
+    keywords: ['sweden', 'שוודיה', 'swedish', 'nordic', 'נורדי', 'ishares', 'קרן סל'] },
+
+  // ── Japan ────────────────────────────────────────────────
+  { symbol: '^N225', name: 'Nikkei 225 – מדד יפן',
+    keywords: ['japan', 'יפן', 'japanese', 'nikkei', 'ניקיי', 'טוקיו', 'tokyo', 'מדד', 'index'] },
+  { symbol: 'EWJ',   name: 'iShares MSCI Japan ETF',
+    keywords: ['japan', 'יפן', 'japanese', 'nikkei', 'ניקיי', 'טוקיו', 'tokyo', 'ishares', 'קרן סל'] },
+  { symbol: 'DXJ',   name: 'WisdomTree Japan Hedged Equity ETF',
+    keywords: ['japan', 'יפן', 'japanese', 'wisdomtree', 'hedged', 'מגודר', 'קרן סל'] },
+
+  // ── China ────────────────────────────────────────────────
+  { symbol: '^HSI',  name: 'Hang Seng – מדד הונג קונג',
+    keywords: ['hongkong', 'hong kong', 'הונג קונג', 'china', 'סין', 'hang seng', 'מדד', 'index'] },
+  { symbol: 'MCHI',  name: 'iShares MSCI China ETF',
+    keywords: ['china', 'סין', 'chinese', 'shanghai', 'שנגחאי', 'beijing', 'בייג׳ינג', 'ishares', 'קרן סל'] },
+  { symbol: 'FXI',   name: 'iShares China Large-Cap ETF',
+    keywords: ['china', 'סין', 'chinese', 'large cap', 'ishares', 'קרן סל'] },
+  { symbol: 'KWEB',  name: 'KraneShares CSI China Internet ETF',
+    keywords: ['china', 'סין', 'chinese', 'internet', 'אינטרנט', 'tech', 'טכנולוגיה', 'kraneshares', 'קרן סל'] },
+
+  // ── India ────────────────────────────────────────────────
+  { symbol: '^BSESN', name: 'BSE Sensex – מדד הודו',
+    keywords: ['india', 'הודו', 'indian', 'sensex', 'סנסקס', 'mumbai', 'מומביי', 'מדד', 'index'] },
+  { symbol: 'INDA',  name: 'iShares MSCI India ETF',
+    keywords: ['india', 'הודו', 'indian', 'sensex', 'סנסקס', 'mumbai', 'מומביי', 'ishares', 'קרן סל'] },
+  { symbol: 'INDY',  name: 'iShares India 50 ETF',
+    keywords: ['india', 'הודו', 'indian', 'nifty', 'ניפטי', 'ishares', 'קרן סל'] },
+
+  // ── South Korea ──────────────────────────────────────────
+  { symbol: '^KS11', name: 'KOSPI – מדד דרום קוריאה',
+    keywords: ['korea', 'קוריאה', 'south korea', 'דרום קוריאה', 'kospi', 'korean', 'מדד', 'index'] },
+  { symbol: 'EWY',   name: 'iShares MSCI South Korea ETF',
+    keywords: ['korea', 'קוריאה', 'south korea', 'דרום קוריאה', 'korean', 'samsung', 'סמסונג', 'ishares', 'קרן סל'] },
+
+  // ── Other markets ────────────────────────────────────────
+  { symbol: '^AXJO', name: 'ASX 200 – מדד אוסטרליה',
+    keywords: ['australia', 'אוסטרליה', 'australian', 'asx', 'מדד', 'index'] },
+  { symbol: 'EWA',   name: 'iShares MSCI Australia ETF',
+    keywords: ['australia', 'אוסטרליה', 'australian', 'asx', 'ishares', 'קרן סל'] },
+  { symbol: 'EWT',   name: 'iShares MSCI Taiwan ETF',
+    keywords: ['taiwan', 'טייוואן', 'taiwanese', 'tsmc', 'טי אס אם סי', 'ishares', 'קרן סל'] },
+  { symbol: 'EWC',   name: 'iShares MSCI Canada ETF',
+    keywords: ['canada', 'קנדה', 'canadian', 'toronto', 'tsx', 'ishares', 'קרן סל'] },
+  { symbol: 'EWZ',   name: 'iShares MSCI Brazil ETF',
+    keywords: ['brazil', 'ברזיל', 'brazilian', 'emerging', 'שווקים מתפתחים', 'ishares', 'קרן סל'] },
 
   // ── Bonds ────────────────────────────────────────────────
   { symbol: 'AGG',   name: 'iShares Core US Aggregate Bond ETF',
