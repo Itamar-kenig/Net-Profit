@@ -1,11 +1,36 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 export default function InfoModal({ symbol, color, onClose }) {
+  const [info, setInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setInfo(null)
+    setError(null)
+
+    supabase.functions.invoke('get-symbol-info', { body: { symbol } })
+      .then(({ data, error: err }) => {
+        if (cancelled) return
+        if (err || !data?.success) {
+          setError('לא ניתן לטעון מידע כרגע.')
+        } else {
+          setInfo(data.info)
+        }
+        setLoading(false)
+      })
+
+    return () => { cancelled = true }
+  }, [symbol])
 
   return (
     <div
@@ -39,7 +64,23 @@ export default function InfoModal({ symbol, color, onClose }) {
           </button>
         </div>
 
-        <p style={{ color: '#9ca3af', fontSize: 13 }}>מידע נוסף בקרוב...</p>
+        {/* Content */}
+        {loading && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#9ca3af', fontSize: 14 }}>
+            <div style={{ width: 16, height: 16, border: '2px solid #4ade80', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            טוען מידע...
+          </div>
+        )}
+
+        {error && (
+          <p style={{ color: '#f87171', fontSize: 13 }}>{error}</p>
+        )}
+
+        {info && (
+          <p style={{ color: '#d1d5db', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{info}</p>
+        )}
+
+        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
       </div>
     </div>
   )
