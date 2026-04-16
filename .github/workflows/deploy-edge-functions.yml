@@ -1,0 +1,23 @@
+name: Deploy Edge Functions
+
+on:
+  workflow_dispatch:   # הרצה ידנית מ-GitHub
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy get-symbol-info
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          supabase functions deploy get-symbol-info --project-ref vwmcuhkwjvcxnnzndgac
