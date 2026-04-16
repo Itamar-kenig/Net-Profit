@@ -3,6 +3,7 @@ import {
   calcCAGRFromSeries, calcNetProfit,
   getFee, filterPrices, calcYearlyReturns, calcMonthlyReturns,
 } from '../utils/finance'
+import InfoModal from './InfoModal'
 
 const COLORS = ['#4ade80','#60a5fa','#f59e0b','#f472b6','#a78bfa','#34d399','#fb923c']
 
@@ -35,6 +36,7 @@ function getActualYears(prices) {
 
 export default function StatsTable({ symbols, pricesMap, investment, period, customStart, customEnd }) {
   const [breakdown, setBreakdown] = useState(null) // null | 'yearly' | 'monthly'
+  const [infoSymbol, setInfoSymbol] = useState(null) // { sym, color } | null
 
   const cell = { padding: '10px 14px', fontSize: 13 }
   const th = { ...cell, color: '#6b7280', fontWeight: 500, borderBottom: '1px solid #1f2937', textAlign: 'right' }
@@ -68,8 +70,8 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr>
-              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול'].map((h, i) => (
-                <th key={h} style={i === 0 ? stickyTh : th}>{h}</th>
+              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול', ''].map((h, i) => (
+                <th key={h || 'info'} style={i === 0 ? stickyTh : th}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -137,6 +139,19 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   </td>
                   <td style={{ ...cell, fontFamily: 'monospace', color: '#f87171' }}>
                     {net ? fmtCurrency(net.feeCost) : '–'}
+                  </td>
+                  <td style={{ ...cell, textAlign: 'center' }}>
+                    <button
+                      onClick={() => setInfoSymbol({ sym, color: COLORS[i % COLORS.length] })}
+                      title="מידע נוסף"
+                      style={{
+                        background: 'none', border: '1px solid #374151', borderRadius: 6,
+                        color: '#6b7280', cursor: 'pointer', padding: '2px 8px',
+                        fontSize: 13, lineHeight: 1.4,
+                      }}
+                    >
+                      ℹ
+                    </button>
                   </td>
                 </tr>
               )
@@ -207,6 +222,14 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
       <p style={{ color: '#4b5563', fontSize: 11, padding: '8px 16px' }}>
         * Net Profit מחושב על בסיס CAGR מהתקופה הנבחרת עם ריבית דריבית.
       </p>
+
+      {infoSymbol && (
+        <InfoModal
+          symbol={infoSymbol.sym}
+          color={infoSymbol.color}
+          onClose={() => setInfoSymbol(null)}
+        />
+      )}
     </div>
   )
 }
