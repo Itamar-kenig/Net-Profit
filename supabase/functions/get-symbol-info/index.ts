@@ -3,6 +3,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const ok = (body: object) =>
+  new Response(JSON.stringify(body), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -10,18 +15,10 @@ Deno.serve(async (req) => {
 
   try {
     const { symbol } = await req.json()
-    if (!symbol) {
-      return new Response(JSON.stringify({ error: 'symbol required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (!symbol) return ok({ success: false, error: 'symbol required' })
 
     const apiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (!apiKey) return ok({ success: false, error: 'GEMINI_API_KEY not configured in Supabase secrets' })
 
     const prompt = `כתוב הסבר קצר ומועיל בעברית על הנכס הפיננסי: ${symbol}
 
@@ -45,22 +42,15 @@ Deno.serve(async (req) => {
     )
 
     if (!res.ok) {
-      const err = await res.text()
-      return new Response(JSON.stringify({ error: err }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      const errText = await res.text()
+      return ok({ success: false, error: `Gemini API ${res.status}: ${errText}` })
     }
 
     const data = await res.json()
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 
-    return new Response(
-      JSON.stringify({ success: true, info: text }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
-    )
+    return ok({ success: true, info: text })
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return ok({ success: false, error: e.message })
   }
 })
