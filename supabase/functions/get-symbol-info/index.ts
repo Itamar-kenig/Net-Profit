@@ -1,5 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -18,35 +16,33 @@ Deno.serve(async (req) => {
       })
     }
 
-    const apiKey = Deno.env.get('ANTHROPIC_API_KEY')
+    const apiKey = Deno.env.get('GEMINI_API_KEY')
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY not configured' }), {
+      return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not configured' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    const prompt = `כתוב הסבר קצר ומועיל בעברית על הנכס הפיננסי הבא: ${symbol}
+    const prompt = `כתוב הסבר קצר ומועיל בעברית על הנכס הפיננסי: ${symbol}
 
-כלול בהסבר (3-4 משפטים בלבד):
-- מה סוג הנכס (קרן סל / מניה / מדד / אג"ח / סחורה)
+כלול (3-4 משפטים בלבד):
+- סוג הנכס (קרן סל / מניה / מדד / אג"ח / סחורה)
 - מה הוא עוקב אחריו או מה החברה עושה
-- מאפיינים עיקריים שכדאי לדעת
+- מאפיין עיקרי אחד שכדאי לדעת
 
 ענה בעברית בלבד, ללא כותרות, ישירות לתוכן.`
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    })
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.4 },
+        }),
+      }
+    )
 
     if (!res.ok) {
       const err = await res.text()
@@ -56,7 +52,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await res.json()
-    const text = data?.content?.[0]?.text ?? ''
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 
     return new Response(
       JSON.stringify({ success: true, info: text }),
