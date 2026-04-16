@@ -21,8 +21,10 @@ export default function InfoModal({ symbol, color, onClose }) {
     supabase.functions.invoke('get-symbol-info', { body: { symbol } })
       .then(({ data, error: err }) => {
         if (cancelled) return
-        if (err || !data?.success) {
-          setError('לא ניתן לטעון מידע כרגע.')
+        if (err) {
+          setError(`שגיאת רשת: ${err.message}`)
+        } else if (!data?.success) {
+          setError(`שגיאה: ${data?.error || 'תגובה לא תקינה'}`)
         } else {
           setInfo(data.info)
         }
