@@ -25,7 +25,8 @@
 | `src/lib/supabase.js` | יצירת Supabase client (עם fallback credentials מקודדים לבולט) |
 | `src/utils/finance.js` | כל הלוגיקה הפיננסית |
 | `src/utils/mockData.js` | נתוני demo כשאין Supabase |
-| `src/utils/symbolsDb.js` | מאגר ~55 סימולים כולל מדדים ישראליים, עם מילות חיפוש בעברית ואנגלית |
+| `src/utils/symbolsDb.js` | מאגר ~85 סימולים כולל מדדים ישראליים + בינלאומיים, עם מילות חיפוש בעברית ואנגלית |
+| `src/utils/etfHoldings.js` | נתוני הרכב סטטיים (top-10 אחזקות + %) לכ-40 קרנות סל ומדדים |
 
 ### קומפוננטות
 
@@ -33,7 +34,9 @@
 |---|---|
 | `src/components/SearchBar.jsx` | חיפוש autocomplete + quick-add chips (localStorage) |
 | `src/components/ComparisonChart.jsx` | גרף קווי של תשואה מצטברת (Recharts) + בחירת תקופה |
-| `src/components/StatsTable.jsx` | טבלת השוואה עם CAGR, תשואות, דמי ניהול, Net Profit |
+| `src/components/StatsTable.jsx` | טבלת השוואה עם CAGR, תשואות, דמי ניהול, Net Profit + כפתורי ℹ / הרכב |
+| `src/components/InfoModal.jsx` | מודל תיאור נכס — קריאה ל-Edge Function `get-symbol-info` (Groq AI), תיאור עברי קצר |
+| `src/components/HoldingsModal.jsx` | מודל הרכב קרן — טבלת top-10 אחזקות עם % bars (נתונים מ-`etfHoldings.js`) |
 
 ### זרימת נתונים
 1. משתמש מוסיף סימול דרך `SearchBar` (autocomplete מ-`symbolsDb.js`)
@@ -86,14 +89,21 @@
 
 ---
 
-## Supabase Edge Function
+## Supabase Edge Functions
 
 | קובץ | תפקיד |
 |---|---|
 | `supabase/functions/fetch-symbol/index.ts` | Deno function — מושכת סימול חדש מ-Yahoo Finance API ושומרת ב-Supabase |
+| `supabase/functions/get-symbol-info/index.ts` | Deno function — קריאה ל-Groq API להחזרת תיאור עברי קצר של הנכס |
 
-**זרימה:** `App.jsx` → `supabase.functions.invoke('fetch-symbol', { body: { symbol } })` → Yahoo Finance v8 API → upsert ל-`historical_prices`.
+**fetch-symbol זרימה:** `App.jsx` → `supabase.functions.invoke('fetch-symbol', { body: { symbol } })` → Yahoo Finance v8 API → upsert ל-`historical_prices`.
 שומרת `close` (גולמי) ו-`adj_close` (מתואם) בנפרד.
+
+**get-symbol-info פרטים:**
+- משתמשת ב-secret `GROQ_API_KEY` (מוגדר ב-Supabase Dashboard → Edge Functions → Secrets)
+- מודל: `llama-3.1-8b-instant`, `max_tokens: 600`, `stream: false`, `temperature: 0.4`
+- מחזירה תמיד HTTP 200: `{ success: true, info: '...' }` או `{ success: false, error: '...' }`
+- לאחר שינוי בקוד — נדרש deploy ידני דרך GitHub Actions
 
 ---
 
@@ -102,8 +112,9 @@
 | קובץ | תפקיד |
 |---|---|
 | `.github/workflows/fetch-historical-data.yml` | הרצה ידנית + שבועית (יום שני 06:00 UTC) של `fetch_historical_data.py` |
+| `.github/workflows/deploy-edge-functions.yml` | הרצה ידנית בלבד — פורסת את `get-symbol-info` ל-Supabase (project: `vwmcuhkwjvcxnnzndgac`) |
 
-Secrets נדרשים: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
+Secrets נדרשים: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_ACCESS_TOKEN`.
 
 ---
 
@@ -140,7 +151,7 @@ Secrets נדרשים: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`.
 | `buildChartData(symbols, pricesMap)` | מיזוג סדרות לגרף + downsampling חודשי; מיישר לתאריך התחלה משותף (המאוחר מבין הסימולים) |
 | `calcYearlyReturns(prices)` | תשואה לכל שנה קלנדרית בסדרה |
 | `calcMonthlyReturns(prices)` | תשואה לכל חודש קלנדרי בסדרה |
-| `getFee(symbol)` | דמי ניהול ידועים לפי סימול (SPY=0.0945%, QQQ=0.2%, ...) |
+| `getFee(symbol)` | דמי ניהול ידועים: מניות=0%, ETFs בינלאומיים 0.05–0.74%, ברירת מחדל 0.2% לסימולים לא מוכרים |
 | `calcCumulativeReturns(prices)` | סדרת תשואה מצטברת רבייסד ל-0% |
 
 **נוסחת Net Profit:**
@@ -170,7 +181,13 @@ feeCost    = grossValue - netValue
 
 **תאריך התחלה משותף:** כשמשווים מספר סימולים, כל החישובים מתחילים מתאריך ההנפקה של הסימול **המאוחר ביותר** (השוואה הוגנת).
 
+**כפתור ℹ:** בכל שורה — פותח `InfoModal` עם תיאור עברי מ-Groq AI (Edge Function `get-symbol-info`).
+
+**כפתור הרכב ▼:** בשורות ETF/מדד בלבד (לא מניות) — פותח `HoldingsModal` עם top-10 אחזקות ו-% bars. הנתונים סטטיים מ-`etfHoldings.js`.
+
 **מדדים ישראליים זמינים בחיפוש:** `^TA125.TA`, `^TA35.TA`, `^TA90.TA`, `^TELBND.TA`, `EIS`
+
+**סימולים בינלאומיים זמינים בחיפוש:** ETFs אירופאיים (VGK, FEZ, EWG, EWQ, EWU, EWI, EWP, EWL, EWN, EWD), יפן (EWJ, DXJ), סין (MCHI, FXI, KWEB), הודו (INDA, INDY), קוריאה (EWY), טייוואן (EWT), ברזיל (EWZ), אוסטרליה (EWA), קנדה (EWC), עולמי (ACWI, VT)
 
 **Benchmark:** כפתור `⚖ S&P 500` בגרף מוסיף קו אפור מקווקו של `^GSPC` להשוואה ויזואלית ללא השפעה על הטבלה.
 
@@ -187,6 +204,12 @@ feeCost    = grossValue - netValue
 | `VITE_DEMO_MODE=true` | אופציונלי – כפיית demo mode |
 
 **הערה:** `src/lib/supabase.js` ו-`src/utils/mockData.js` מכילים fallback credentials מקודדים כדי שהפרויקט יעבוד ב-Bolt ללא env vars.
+
+### Supabase Secrets (Dashboard → Edge Functions → Secrets)
+
+| Secret | שימוש |
+|---|---|
+| `GROQ_API_KEY` | מפתח API של Groq (console.groq.com) — נדרש ל-`get-symbol-info` |
 
 ---
 
