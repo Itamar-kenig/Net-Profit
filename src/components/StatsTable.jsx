@@ -4,6 +4,8 @@ import {
   getFee, filterPrices, calcYearlyReturns, calcMonthlyReturns,
 } from '../utils/finance'
 import InfoModal from './InfoModal'
+import HoldingsModal from './HoldingsModal'
+import { ETF_HOLDINGS } from '../utils/etfHoldings'
 
 const COLORS = ['#4ade80','#60a5fa','#f59e0b','#f472b6','#a78bfa','#34d399','#fb923c']
 
@@ -37,6 +39,7 @@ function getActualYears(prices) {
 export default function StatsTable({ symbols, pricesMap, investment, period, customStart, customEnd }) {
   const [breakdown, setBreakdown] = useState(null) // null | 'yearly' | 'monthly'
   const [infoSymbol, setInfoSymbol] = useState(null) // { sym, color } | null
+  const [holdingsSymbol, setHoldingsSymbol] = useState(null) // { sym, color } | null
 
   const cell = { padding: '10px 14px', fontSize: 13 }
   const th = { ...cell, color: '#6b7280', fontWeight: 500, borderBottom: '1px solid #1f2937', textAlign: 'right' }
@@ -140,7 +143,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   <td style={{ ...cell, fontFamily: 'monospace', color: '#f87171' }}>
                     {net ? fmtCurrency(net.feeCost) : '–'}
                   </td>
-                  <td style={{ ...cell, textAlign: 'center' }}>
+                  <td style={{ ...cell, textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button
                       onClick={() => setInfoSymbol({ sym, color: COLORS[i % COLORS.length] })}
                       title="מידע נוסף"
@@ -152,6 +155,19 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                     >
                       ℹ
                     </button>
+                    {ETF_HOLDINGS[sym] && (
+                      <button
+                        onClick={() => setHoldingsSymbol({ sym, color: COLORS[i % COLORS.length] })}
+                        title="הרכב קרן"
+                        style={{
+                          marginRight: 4, background: 'none', border: '1px solid #374151',
+                          borderRadius: 6, color: '#6b7280', cursor: 'pointer',
+                          padding: '2px 8px', fontSize: 12, lineHeight: 1.4,
+                        }}
+                      >
+                        הרכב ▼
+                      </button>
+                    )}
                   </td>
                 </tr>
               )
@@ -228,6 +244,14 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
           symbol={infoSymbol.sym}
           color={infoSymbol.color}
           onClose={() => setInfoSymbol(null)}
+        />
+      )}
+      {holdingsSymbol && (
+        <HoldingsModal
+          symbol={holdingsSymbol.sym}
+          color={holdingsSymbol.color}
+          holdings={ETF_HOLDINGS[holdingsSymbol.sym] || []}
+          onClose={() => setHoldingsSymbol(null)}
         />
       )}
     </div>
