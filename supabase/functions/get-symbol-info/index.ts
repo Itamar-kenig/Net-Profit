@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
 - מה הוא עוקב אחריו או מה החברה עושה
 - מאפיין עיקרי אחד שכדאי לדעת
 
-ענה בעברית בלבד, ללא כותרות, ישירות לתוכן.`
+ענה בעברית בלבד, ללא כותרות, ישירות לתוכן. סיים כל משפט לפני שאתה עוצר.`
 
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -36,10 +36,11 @@ Deno.serve(async (req) => {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 300,
+        max_tokens: 600,
         temperature: 0.4,
+        stream: false,
       }),
     })
 
