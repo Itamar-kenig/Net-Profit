@@ -4,6 +4,7 @@ import { MOCK_PRICES, isDemoMode } from './utils/mockData'
 import SearchBar from './components/SearchBar'
 import ComparisonChart from './components/ComparisonChart'
 import StatsTable from './components/StatsTable'
+import { useIsMobile } from './hooks/useIsMobile'
 
 const DEMO = isDemoMode()
 const CACHE_TTL = 4 * 60 * 60 * 1000 // 4 hours
@@ -165,15 +166,16 @@ export default function App() {
   }
 
   const isLoading = loading || !!fetchingSymbol
+  const isMobile = useIsMobile()
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+      <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
         <div>
-          <h1 className="text-2xl font-bold text-green-400 tracking-tight">Net Profit</h1>
-          <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>
+          <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
+          {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className={`flex items-center gap-3 text-sm ${isMobile ? 'self-start' : ''}`}>
           <label className="text-gray-400">השקעה ($):</label>
           <input
             type="number"
@@ -181,12 +183,12 @@ export default function App() {
             min={100}
             step={1000}
             onChange={(e) => setInvestment(Math.max(0, Number(e.target.value)))}
-            className="w-28 bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-right focus:outline-none focus:border-green-500 transition-colors"
+            className={`${isMobile ? 'w-32' : 'w-28'} bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-right focus:outline-none focus:border-green-500 transition-colors`}
           />
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <main className={`max-w-7xl mx-auto ${isMobile ? 'px-3 py-4' : 'px-4 py-6'} space-y-4`}>
         {DEMO && (
           <div className="bg-yellow-950 border border-yellow-700 text-yellow-300 px-4 py-2 rounded-lg text-sm">
             ⚠️ <strong>מצב Demo</strong> – נתונים מדומים. חבר Supabase לנתונים אמיתיים.

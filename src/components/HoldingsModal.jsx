@@ -16,8 +16,8 @@ export default function HoldingsModal({ symbol, color, holdings = [], onClose })
   }
   const card = {
     background: '#111827', border: '1px solid #374151', borderRadius: 12,
-    width: '100%', maxWidth: 480, maxHeight: '80vh', overflowY: 'auto',
-    padding: 24, direction: 'rtl',
+    width: '100%', maxWidth: 480, maxHeight: '85vh', overflowY: 'auto',
+    padding: 'clamp(14px, 4vw, 24px)', direction: 'rtl',
   }
   const th = {
     padding: '6px 10px', color: '#6b7280', fontWeight: 500, fontSize: 12,

@@ -4,6 +4,7 @@ import {
   Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts'
 import { buildChartData, filterPrices, PERIODS } from '../utils/finance'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const COLORS = ['#4ade80','#60a5fa','#f59e0b','#f472b6','#a78bfa','#34d399','#fb923c']
 
@@ -49,6 +50,7 @@ export default function ComparisonChart({
   benchmark, benchmarkData, onToggleBenchmark,
 }) {
   const [showDollar, setShowDollar] = useState(false)
+  const isMobile = useIsMobile()
   const filteredMap = {}
   for (const sym of symbols) {
     filteredMap[sym] = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
@@ -64,14 +66,15 @@ export default function ComparisonChart({
     <div style={{ background:'#111827', border:'1px solid #1f2937', borderRadius:12, padding:16 }}>
       {/* Period buttons row — horizontally scrollable on mobile */}
       <div style={{ overflowX:'auto', marginBottom:8, marginInline:-16, paddingInline:16 }}>
-        <div style={{ display:'flex', gap:6, alignItems:'center', minWidth:'max-content' }}>
-          <span style={{ color:'#6b7280', fontSize:12 }}>תקופה:</span>
+        <div style={{ display:'flex', gap: isMobile ? 5 : 6, alignItems:'center', minWidth:'max-content' }}>
+          <span style={{ color:'#6b7280', fontSize: isMobile ? 11 : 12 }}>תקופה:</span>
           {PERIODS.map((p) => (
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
               style={{
-                padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+                padding: isMobile ? '6px 10px' : '3px 10px',
+                borderRadius:6, fontSize: isMobile ? 13 : 12, cursor:'pointer',
                 background: period === p.value ? '#4ade80' : '#1f2937',
                 color:       period === p.value ? '#030712' : '#9ca3af',
                 border:      period === p.value ? 'none'    : '1px solid #374151',
@@ -84,33 +87,36 @@ export default function ComparisonChart({
           <button
             onClick={() => setPeriod('custom')}
             style={{
-              padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+              padding: isMobile ? '6px 10px' : '3px 10px',
+              borderRadius:6, fontSize: isMobile ? 13 : 12, cursor:'pointer',
               background: period === 'custom' ? '#4ade80' : '#1f2937',
               color:       period === 'custom' ? '#030712' : '#9ca3af',
               border:      period === 'custom' ? 'none'    : '1px solid #374151',
               fontWeight:  period === 'custom' ? 600       : 400,
             }}
           >
-            תאריך מותאם
+            {isMobile ? 'מותאם' : 'תאריך מותאם'}
           </button>
           {/* Dollar / % toggle */}
           <button
             onClick={() => setShowDollar((d) => !d)}
             style={{
-              padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+              padding: isMobile ? '6px 10px' : '3px 10px',
+              borderRadius:6, fontSize: isMobile ? 13 : 12, cursor:'pointer',
               background: showDollar ? '#1e3a5f' : '#1f2937',
               color: showDollar ? '#60a5fa' : '#6b7280',
               border: showDollar ? '1px solid #3b82f6' : '1px solid #374151',
             }}
           >
-            {showDollar ? '$ ←→ %' : '$ ←→ %'}
+            $ ←→ %
           </button>
           {/* Benchmark toggle */}
           {onToggleBenchmark && (
             <button
               onClick={onToggleBenchmark}
               style={{
-                padding:'3px 10px', borderRadius:6, fontSize:12, cursor:'pointer',
+                padding: isMobile ? '6px 10px' : '3px 10px',
+                borderRadius:6, fontSize: isMobile ? 13 : 12, cursor:'pointer',
                 background: benchmark ? '#374151' : '#1f2937',
                 color: benchmark ? '#d1d5db' : '#6b7280',
                 border: benchmark ? '1px solid #6b7280' : '1px solid #374151',
@@ -142,24 +148,24 @@ export default function ComparisonChart({
         </div>
       )}
 
-      <h2 style={{ color:'#e5e7eb', fontWeight:600, marginBottom:12, fontSize:16 }}>תשואה מצטברת</h2>
+      <h2 style={{ color:'#e5e7eb', fontWeight:600, marginBottom:12, fontSize: isMobile ? 14 : 16 }}>תשואה מצטברת</h2>
 
       {chartData.length === 0 ? (
         <div style={{ textAlign:'center', color:'#6b7280', padding:'40px 0' }}>
           אין נתונים להצגה לתקופה הנבחרת
         </div>
       ) : (
-        <div style={{ width:'100%', height:380 }}>
+        <div style={{ width:'100%', height: isMobile ? 240 : 380 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top:5, right:20, left:10, bottom:5 }}>
+            <LineChart data={chartData} margin={{ top:5, right: isMobile ? 8 : 20, left: isMobile ? 0 : 10, bottom:5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fill:'#6b7280', fontSize:11 }} interval="preserveStartEnd" minTickGap={60} />
+              <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fill:'#6b7280', fontSize: isMobile ? 10 : 11 }} interval="preserveStartEnd" minTickGap={isMobile ? 50 : 60} />
               <YAxis
                 tickFormatter={(v) => showDollar ? fmtUSD(investment * (1 + v / 100)) : `${v >= 0 ? '+' : ''}${v}%`}
-                tick={{ fill:'#6b7280', fontSize:11 }} width={75}
+                tick={{ fill:'#6b7280', fontSize: isMobile ? 10 : 11 }} width={isMobile ? 48 : 75}
               />
               <Tooltip content={<CustomTooltip investment={investment} showDollar={showDollar} />} />
-              <Legend formatter={(value) => <span style={{ color:'#d1d5db', fontSize:13 }}>{value}</span>} />
+              <Legend formatter={(value) => <span style={{ color:'#d1d5db', fontSize: isMobile ? 11 : 13 }}>{value}</span>} />
               <ReferenceLine y={0} stroke="#374151" strokeDasharray="4 4" />
               {symbols.map((sym, i) => (
                 <Line key={sym} type="monotone" dataKey={sym} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={2} connectNulls />

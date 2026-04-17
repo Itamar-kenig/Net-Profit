@@ -6,6 +6,7 @@ import {
 import InfoModal from './InfoModal'
 import HoldingsModal from './HoldingsModal'
 import { ETF_HOLDINGS } from '../utils/etfHoldings'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const COLORS = ['#4ade80','#60a5fa','#f59e0b','#f472b6','#a78bfa','#34d399','#fb923c']
 
@@ -37,120 +38,94 @@ function getActualYears(prices) {
 }
 
 export default function StatsTable({ symbols, pricesMap, investment, period, customStart, customEnd }) {
-  const [breakdown, setBreakdown] = useState(null) // null | 'yearly' | 'monthly'
-  const [infoSymbol, setInfoSymbol] = useState(null) // { sym, color } | null
-  const [holdingsSymbol, setHoldingsSymbol] = useState(null) // { sym, color } | null
+  const [breakdown, setBreakdown] = useState(null)
+  const [infoSymbol, setInfoSymbol] = useState(null)
+  const [holdingsSymbol, setHoldingsSymbol] = useState(null)
+  const isMobile = useIsMobile()
 
-  const cell = { padding: '10px 14px', fontSize: 13 }
+  const pad = isMobile ? '8px 10px' : '10px 14px'
+  const fs = isMobile ? 12 : 13
+  const cell = { padding: pad, fontSize: fs }
   const th = { ...cell, color: '#6b7280', fontWeight: 500, borderBottom: '1px solid #1f2937', textAlign: 'right' }
   const stickyTh = { ...th, position: 'sticky', right: 0, background: '#0f172a', zIndex: 2 }
   const stickyCell = { ...cell, position: 'sticky', right: 0, background: '#111827', zIndex: 1 }
   const periodLabel = getPeriodLabel(period, customStart, customEnd)
 
+  // Mobile: show only the most essential columns
+  const desktopHeaders = ['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול', '']
+  const mobileHeaders  = ['סימול', 'תשואה כוללת', 'שווי היום', 'רווח נטו', '']
+  const headers = isMobile ? mobileHeaders : desktopHeaders
+
   return (
     <div style={{ background: '#111827', border: '1px solid #1f2937', borderRadius: 12, overflow: 'hidden' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: '1px solid #1f2937', flexWrap: 'wrap', gap: 8 }}>
-        <h2 style={{ color: '#e5e7eb', fontWeight: 600, fontSize: 16 }}>
-          סיכום – השקעה של {fmtCurrency(investment)} | {periodLabel}
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: isMobile ? '10px 12px' : '14px 16px', borderBottom: '1px solid #1f2937', flexWrap: 'wrap', gap: 8 }}>
+        <h2 style={{ color: '#e5e7eb', fontWeight: 600, fontSize: isMobile ? 13 : 16 }}>
+          סיכום – {fmtCurrency(investment)} | {periodLabel}
         </h2>
         <div style={{ display: 'flex', gap: 6 }}>
           {['yearly', 'monthly'].map((type) => (
             <button key={type} onClick={() => setBreakdown(breakdown === type ? null : type)}
               style={{
-                padding: '4px 12px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
+                padding: isMobile ? '5px 8px' : '4px 12px',
+                borderRadius: 6, fontSize: isMobile ? 11 : 12, cursor: 'pointer',
                 background: breakdown === type ? '#4ade80' : '#1f2937',
                 color: breakdown === type ? '#030712' : '#9ca3af',
                 border: breakdown === type ? 'none' : '1px solid #374151',
               }}
             >
-              {breakdown === type ? 'הסתר' : type === 'yearly' ? 'תשואות שנתיות ▼' : 'תשואות חודשיות ▼'}
+              {breakdown === type ? 'הסתר' : type === 'yearly' ? 'שנתי ▼' : 'חודשי ▼'}
             </button>
           ))}
         </div>
       </div>
 
+      {/* Main table */}
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: fs }}>
           <thead>
             <tr>
-              {['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול', ''].map((h, i) => (
-                <th key={h || 'info'} style={i === 0 ? stickyTh : th}>{h}</th>
+              {headers.map((h, i) => (
+                <th key={h || 'btns'} style={i === 0 ? stickyTh : th}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {(() => {
-              // Shared start: latest first-date across all symbols for fair comparison
               const sharedStart = symbols.reduce((latest, sym) => {
                 const p = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
                 return p.length > 0 && p[0].date > latest ? p[0].date : latest
               }, '')
               return symbols.map((sym, i) => {
-              const raw    = pricesMap[sym] || []
-              const prices = filterPrices(raw, period, customStart, customEnd)
-                .filter((p) => p.date >= sharedStart)
-              const hasData = prices.length >= 2
-              const cagr = hasData ? calcCAGRFromSeries(prices) : null
-              const fee  = getFee(sym) ?? 0.2
-              const years = hasData ? getActualYears(prices) : null
-              const net  = hasData && cagr !== null && years
-                ? calcNetProfit({ initialInvestment: investment, grossCAGR: cagr, managementFee: fee, years })
-                : null
-              const pAdj = (r) => r.adj_close ?? r.close
-              const pClose = (r) => r.close
-              const priceReturn = hasData
-                ? Number((((pClose(prices[prices.length - 1]) - pClose(prices[0])) / pClose(prices[0])) * 100).toFixed(2))
-                : null
-              const totalReturn = hasData
-                ? Number((((pAdj(prices[prices.length - 1]) - pAdj(prices[0])) / pAdj(prices[0])) * 100).toFixed(2))
-                : null
-              const currentValue = totalReturn !== null
-                ? investment * (1 + totalReturn / 100)
-                : null
+                const raw    = pricesMap[sym] || []
+                const prices = filterPrices(raw, period, customStart, customEnd)
+                  .filter((p) => p.date >= sharedStart)
+                const hasData = prices.length >= 2
+                const cagr = hasData ? calcCAGRFromSeries(prices) : null
+                const fee  = getFee(sym) ?? 0.2
+                const years = hasData ? getActualYears(prices) : null
+                const net  = hasData && cagr !== null && years
+                  ? calcNetProfit({ initialInvestment: investment, grossCAGR: cagr, managementFee: fee, years })
+                  : null
+                const pAdj   = (r) => r.adj_close ?? r.close
+                const pClose = (r) => r.close
+                const priceReturn = hasData
+                  ? Number((((pClose(prices[prices.length - 1]) - pClose(prices[0])) / pClose(prices[0])) * 100).toFixed(2))
+                  : null
+                const totalReturn = hasData
+                  ? Number((((pAdj(prices[prices.length - 1]) - pAdj(prices[0])) / pAdj(prices[0])) * 100).toFixed(2))
+                  : null
+                const currentValue = totalReturn !== null ? investment * (1 + totalReturn / 100) : null
 
-              return (
-                <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>
-                  <td style={stickyCell}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block' }} />
-                      <span style={{ color: 'white', fontWeight: 600 }}>{sym}</span>
-                    </div>
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(priceReturn ?? 0) }}>
-                    {priceReturn !== null ? `${priceReturn >= 0 ? '+' : ''}${fmt(priceReturn)}%` : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(totalReturn ?? 0) }}>
-                    {totalReturn !== null ? `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn)}%` : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', color: '#9ca3af' }}>
-                    {fmt(fee)}%
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(cagr ?? 0) }}>
-                    {cagr !== null ? `${cagr >= 0 ? '+' : ''}${fmt(cagr)}%` : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.netCAGR ?? 0) }}>
-                    {net ? `${net.netCAGR >= 0 ? '+' : ''}${fmt(net.netCAGR)}%` : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, color: '#e5e7eb' }}>
-                    {currentValue !== null ? fmtCurrency(currentValue) : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.grossProfit ?? 0) }}>
-                    {net ? fmtCurrency(net.grossProfit) : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(net?.netProfit ?? 0) }}>
-                    {net ? fmtCurrency(net.netProfit) : '–'}
-                  </td>
-                  <td style={{ ...cell, fontFamily: 'monospace', color: '#f87171' }}>
-                    {net ? fmtCurrency(net.feeCost) : '–'}
-                  </td>
+                const btnCell = (
                   <td style={{ ...cell, textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button
                       onClick={() => setInfoSymbol({ sym, color: COLORS[i % COLORS.length] })}
                       title="מידע נוסף"
                       style={{
                         background: 'none', border: '1px solid #374151', borderRadius: 6,
-                        color: '#6b7280', cursor: 'pointer', padding: '2px 8px',
-                        fontSize: 13, lineHeight: 1.4,
+                        color: '#6b7280', cursor: 'pointer', padding: isMobile ? '3px 7px' : '2px 8px',
+                        fontSize: fs, lineHeight: 1.4,
                       }}
                     >
                       ℹ
@@ -162,34 +137,96 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                         style={{
                           marginRight: 4, background: 'none', border: '1px solid #374151',
                           borderRadius: 6, color: '#6b7280', cursor: 'pointer',
-                          padding: '2px 8px', fontSize: 12, lineHeight: 1.4,
+                          padding: isMobile ? '3px 5px' : '2px 8px',
+                          fontSize: isMobile ? 10 : 12, lineHeight: 1.4,
                         }}
                       >
-                        הרכב ▼
+                        {isMobile ? '☰' : 'הרכב ▼'}
                       </button>
                     )}
                   </td>
-                </tr>
-              )
-            })
-          })()}
+                )
+
+                if (isMobile) {
+                  return (
+                    <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>
+                      <td style={stickyCell}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block', flexShrink: 0 }} />
+                          <span style={{ color: 'white', fontWeight: 600, fontSize: 12 }}>{sym}</span>
+                        </div>
+                      </td>
+                      <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(totalReturn ?? 0) }}>
+                        {totalReturn !== null ? `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn)}%` : '–'}
+                      </td>
+                      <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, color: '#e5e7eb' }}>
+                        {currentValue !== null ? fmtCurrency(currentValue) : '–'}
+                      </td>
+                      <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(net?.netProfit ?? 0) }}>
+                        {net ? fmtCurrency(net.netProfit) : '–'}
+                      </td>
+                      {btnCell}
+                    </tr>
+                  )
+                }
+
+                return (
+                  <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>
+                    <td style={stickyCell}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block' }} />
+                        <span style={{ color: 'white', fontWeight: 600 }}>{sym}</span>
+                      </div>
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(priceReturn ?? 0) }}>
+                      {priceReturn !== null ? `${priceReturn >= 0 ? '+' : ''}${fmt(priceReturn)}%` : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(totalReturn ?? 0) }}>
+                      {totalReturn !== null ? `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn)}%` : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', color: '#9ca3af' }}>
+                      {fmt(fee)}%
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(cagr ?? 0) }}>
+                      {cagr !== null ? `${cagr >= 0 ? '+' : ''}${fmt(cagr)}%` : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.netCAGR ?? 0) }}>
+                      {net ? `${net.netCAGR >= 0 ? '+' : ''}${fmt(net.netCAGR)}%` : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, color: '#e5e7eb' }}>
+                      {currentValue !== null ? fmtCurrency(currentValue) : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', ...colorStyle(net?.grossProfit ?? 0) }}>
+                      {net ? fmtCurrency(net.grossProfit) : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(net?.netProfit ?? 0) }}>
+                      {net ? fmtCurrency(net.netProfit) : '–'}
+                    </td>
+                    <td style={{ ...cell, fontFamily: 'monospace', color: '#f87171' }}>
+                      {net ? fmtCurrency(net.feeCost) : '–'}
+                    </td>
+                    {btnCell}
+                  </tr>
+                )
+              })
+            })()}
           </tbody>
         </table>
       </div>
 
       {/* Yearly / Monthly breakdown */}
       {breakdown && (
-        <div style={{ padding: 16, borderTop: '1px solid #1f2937' }}>
-          <h3 style={{ color: '#e5e7eb', fontWeight: 600, marginBottom: 12, fontSize: 14 }}>
+        <div style={{ padding: isMobile ? 10 : 16, borderTop: '1px solid #1f2937' }}>
+          <h3 style={{ color: '#e5e7eb', fontWeight: 600, marginBottom: 10, fontSize: isMobile ? 13 : 14 }}>
             {breakdown === 'yearly' ? 'תשואות לפי שנה' : 'תשואות לפי חודש'} — {periodLabel}
           </h3>
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: isMobile ? 11 : 12 }}>
               <thead>
                 <tr>
-                  <th style={{ ...th, fontSize: 12 }}>{breakdown === 'yearly' ? 'שנה' : 'חודש'}</th>
+                  <th style={{ ...th, fontSize: isMobile ? 11 : 12 }}>{breakdown === 'yearly' ? 'שנה' : 'חודש'}</th>
                   {symbols.map((sym, i) => (
-                    <th key={sym} style={{ ...th, fontSize: 12, color: COLORS[i % COLORS.length] }}>{sym}</th>
+                    <th key={sym} style={{ ...th, fontSize: isMobile ? 11 : 12, color: COLORS[i % COLORS.length] }}>{sym}</th>
                   ))}
                 </tr>
               </thead>
@@ -213,7 +250,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                   }
                   return Array.from(allKeys).sort((a, b) => (a > b ? -1 : 1)).map((key) => (
                     <tr key={key} style={{ borderBottom: '1px solid #1f2937' }}>
-                      <td style={{ ...cell, fontSize: 12, color: '#9ca3af', fontWeight: 500 }}>
+                      <td style={{ ...cell, fontSize: isMobile ? 11 : 12, color: '#9ca3af', fontWeight: 500 }}>
                         {breakdown === 'monthly'
                           ? new Date(key + '-01').toLocaleDateString('he-IL', { month: 'short', year: 'numeric' })
                           : key}
@@ -221,7 +258,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                       {symbols.map((sym) => {
                         const val = dataMap[sym]?.[key]
                         return (
-                          <td key={sym} style={{ ...cell, fontSize: 12, fontFamily: 'monospace', ...colorStyle(val ?? 0) }}>
+                          <td key={sym} style={{ ...cell, fontSize: isMobile ? 11 : 12, fontFamily: 'monospace', ...colorStyle(val ?? 0) }}>
                             {val !== undefined ? `${val >= 0 ? '+' : ''}${fmt(val)}%` : '–'}
                           </td>
                         )
@@ -235,16 +272,13 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
         </div>
       )}
 
-      <p style={{ color: '#4b5563', fontSize: 11, padding: '8px 16px' }}>
+      <p style={{ color: '#4b5563', fontSize: 11, padding: '8px 12px' }}>
         * Net Profit מחושב על בסיס CAGR מהתקופה הנבחרת עם ריבית דריבית.
+        {isMobile && <span style={{ color: '#374151' }}> — החלק ימינה לכל הנתונים</span>}
       </p>
 
       {infoSymbol && (
-        <InfoModal
-          symbol={infoSymbol.sym}
-          color={infoSymbol.color}
-          onClose={() => setInfoSymbol(null)}
-        />
+        <InfoModal symbol={infoSymbol.sym} color={infoSymbol.color} onClose={() => setInfoSymbol(null)} />
       )}
       {holdingsSymbol && (
         <HoldingsModal

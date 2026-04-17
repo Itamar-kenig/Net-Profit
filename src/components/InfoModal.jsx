@@ -47,7 +47,7 @@ export default function InfoModal({ symbol, color, onClose }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           background: '#111827', border: '1px solid #374151', borderRadius: 12,
-          padding: 24, width: '100%', maxWidth: 480, maxHeight: '80vh',
+          padding: 'clamp(14px, 4vw, 24px)', width: '100%', maxWidth: 480, maxHeight: '85vh',
           overflowY: 'auto', position: 'relative',
         }}
       >
