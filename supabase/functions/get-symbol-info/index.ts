@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
     const { symbol } = await req.json()
     if (!symbol) return ok({ success: false, error: 'symbol required' })
 
-    const apiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!apiKey) return ok({ success: false, error: 'GEMINI_API_KEY not configured in Supabase secrets' })
+    const apiKey = Deno.env.get('GROQ_API_KEY')
+    if (!apiKey) return ok({ success: false, error: 'GROQ_API_KEY not configured in Supabase secrets' })
 
     const prompt = `כתוב הסבר קצר ומועיל בעברית על הנכס הפיננסי: ${symbol}
 
@@ -29,25 +29,27 @@ Deno.serve(async (req) => {
 
 ענה בעברית בלבד, ללא כותרות, ישירות לתוכן.`
 
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 300, temperature: 0.4 },
-        }),
-      }
-    )
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 300,
+        temperature: 0.4,
+      }),
+    })
 
     if (!res.ok) {
       const errText = await res.text()
-      return ok({ success: false, error: `Gemini API ${res.status}: ${errText}` })
+      return ok({ success: false, error: `Groq API ${res.status}: ${errText}` })
     }
 
     const data = await res.json()
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+    const text = data?.choices?.[0]?.message?.content ?? ''
 
     return ok({ success: true, info: text })
   } catch (e: any) {
