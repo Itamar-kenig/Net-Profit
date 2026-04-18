@@ -122,8 +122,9 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                       title="מידע נוסף"
                       style={{
                         background: 'none', border: '1px solid #374151', borderRadius: 6,
-                        color: '#6b7280', cursor: 'pointer', padding: '2px 6px',
-                        fontSize: fs, lineHeight: 1.4,
+                        color: '#6b7280', cursor: 'pointer',
+                        padding: isMobile ? '6px 10px' : '2px 6px',
+                        fontSize: isMobile ? 14 : fs, lineHeight: 1.4,
                       }}
                     >
                       ℹ
@@ -135,7 +136,8 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                         style={{
                           marginRight: 3, background: 'none', border: '1px solid #374151',
                           borderRadius: 6, color: '#6b7280', cursor: 'pointer',
-                          padding: '2px 5px', fontSize: isMobile ? 9 : 11, lineHeight: 1.4,
+                          padding: isMobile ? '6px 8px' : '2px 5px',
+                          fontSize: isMobile ? 12 : 11, lineHeight: 1.4,
                         }}
                       >
                         {isMobile ? '☰' : 'הרכב ▼'}
