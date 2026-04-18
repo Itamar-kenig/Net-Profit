@@ -230,20 +230,22 @@ export default function App() {
 
         {!isLoading && symbols.length > 0 && (
           <>
-            <ComparisonChart
-              symbols={symbols}
-              pricesMap={pricesMap}
-              investment={investment}
-              period={period}
-              setPeriod={setPeriod}
-              customStart={customStart}
-              customEnd={customEnd}
-              setCustomStart={setCustomStart}
-              setCustomEnd={setCustomEnd}
-              benchmark={benchmark}
-              benchmarkData={benchmarkData}
-              onToggleBenchmark={toggleBenchmark}
-            />
+            <div style={isMobile ? { marginLeft: -12, marginRight: -12 } : {}}>
+              <ComparisonChart
+                symbols={symbols}
+                pricesMap={pricesMap}
+                investment={investment}
+                period={period}
+                setPeriod={setPeriod}
+                customStart={customStart}
+                customEnd={customEnd}
+                setCustomStart={setCustomStart}
+                setCustomEnd={setCustomEnd}
+                benchmark={benchmark}
+                benchmarkData={benchmarkData}
+                onToggleBenchmark={toggleBenchmark}
+              />
+            </div>
             <StatsTable
               symbols={symbols}
               pricesMap={pricesMap}
