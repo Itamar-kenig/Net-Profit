@@ -43,18 +43,16 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
   const [holdingsSymbol, setHoldingsSymbol] = useState(null)
   const isMobile = useIsMobile()
 
-  const pad = isMobile ? '8px 10px' : '10px 14px'
-  const fs = isMobile ? 12 : 13
+  const pad = isMobile ? '7px 8px' : '10px 14px'
+  const fs = isMobile ? 11 : 13
   const cell = { padding: pad, fontSize: fs }
   const th = { ...cell, color: '#6b7280', fontWeight: 500, borderBottom: '1px solid #1f2937', textAlign: 'right' }
   const stickyTh = { ...th, position: 'sticky', right: 0, background: '#0f172a', zIndex: 2 }
   const stickyCell = { ...cell, position: 'sticky', right: 0, background: '#111827', zIndex: 1 }
   const periodLabel = getPeriodLabel(period, customStart, customEnd)
 
-  // Mobile: show only the most essential columns
-  const desktopHeaders = ['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול', '']
-  const mobileHeaders  = ['סימול', 'תשואה כוללת', 'שווי היום', 'רווח נטו', '']
-  const headers = isMobile ? mobileHeaders : desktopHeaders
+  // Always show all columns — horizontal scroll handles overflow on mobile
+  const headers = ['סימול', 'תשואה', 'תשואה כוללת', 'דמי ניהול %', 'CAGR ברוטו', 'CAGR נטו', 'שווי היום', 'רווח ברוטו', 'רווח נטו', 'עלות דמי ניהול', '']
 
   return (
     <div style={{ background: '#111827', border: '1px solid #1f2937', borderRadius: 12, overflow: 'hidden' }}>
@@ -124,7 +122,7 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                       title="מידע נוסף"
                       style={{
                         background: 'none', border: '1px solid #374151', borderRadius: 6,
-                        color: '#6b7280', cursor: 'pointer', padding: isMobile ? '3px 7px' : '2px 8px',
+                        color: '#6b7280', cursor: 'pointer', padding: '2px 6px',
                         fontSize: fs, lineHeight: 1.4,
                       }}
                     >
@@ -135,10 +133,9 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                         onClick={() => setHoldingsSymbol({ sym, color: COLORS[i % COLORS.length] })}
                         title="הרכב קרן"
                         style={{
-                          marginRight: 4, background: 'none', border: '1px solid #374151',
+                          marginRight: 3, background: 'none', border: '1px solid #374151',
                           borderRadius: 6, color: '#6b7280', cursor: 'pointer',
-                          padding: isMobile ? '3px 5px' : '2px 8px',
-                          fontSize: isMobile ? 10 : 12, lineHeight: 1.4,
+                          padding: '2px 5px', fontSize: isMobile ? 9 : 11, lineHeight: 1.4,
                         }}
                       >
                         {isMobile ? '☰' : 'הרכב ▼'}
@@ -146,29 +143,6 @@ export default function StatsTable({ symbols, pricesMap, investment, period, cus
                     )}
                   </td>
                 )
-
-                if (isMobile) {
-                  return (
-                    <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>
-                      <td style={stickyCell}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: COLORS[i % COLORS.length], display: 'inline-block', flexShrink: 0 }} />
-                          <span style={{ color: 'white', fontWeight: 600, fontSize: 12 }}>{sym}</span>
-                        </div>
-                      </td>
-                      <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(totalReturn ?? 0) }}>
-                        {totalReturn !== null ? `${totalReturn >= 0 ? '+' : ''}${fmt(totalReturn)}%` : '–'}
-                      </td>
-                      <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, color: '#e5e7eb' }}>
-                        {currentValue !== null ? fmtCurrency(currentValue) : '–'}
-                      </td>
-                      <td style={{ ...cell, fontFamily: 'monospace', fontWeight: 600, ...colorStyle(net?.netProfit ?? 0) }}>
-                        {net ? fmtCurrency(net.netProfit) : '–'}
-                      </td>
-                      {btnCell}
-                    </tr>
-                  )
-                }
 
                 return (
                   <tr key={sym} style={{ borderBottom: '1px solid #1f2937' }}>

@@ -63,9 +63,9 @@ export default function ComparisonChart({
   const chartData = buildChartData(chartSymbols, filteredMap)
 
   return (
-    <div style={{ background:'#111827', border:'1px solid #1f2937', borderRadius:12, padding:16 }}>
+    <div style={{ background:'#111827', border:'1px solid #1f2937', borderRadius:12, padding: isMobile ? '12px 0 8px' : 16 }}>
       {/* Period buttons row — horizontally scrollable on mobile */}
-      <div style={{ overflowX:'auto', marginBottom:8, marginInline:-16, paddingInline:16 }}>
+      <div style={{ overflowX:'auto', marginBottom:8, marginInline: isMobile ? 0 : -16, paddingInline: isMobile ? 12 : 16 }}>
         <div style={{ display:'flex', gap: isMobile ? 5 : 6, alignItems:'center', minWidth:'max-content' }}>
           <span style={{ color:'#6b7280', fontSize: isMobile ? 11 : 12 }}>תקופה:</span>
           {PERIODS.map((p) => (
@@ -148,7 +148,7 @@ export default function ComparisonChart({
         </div>
       )}
 
-      <h2 style={{ color:'#e5e7eb', fontWeight:600, marginBottom:12, fontSize: isMobile ? 14 : 16 }}>תשואה מצטברת</h2>
+      <h2 style={{ color:'#e5e7eb', fontWeight:600, marginBottom:8, fontSize: isMobile ? 14 : 16, paddingInline: isMobile ? 12 : 0 }}>תשואה מצטברת</h2>
 
       {chartData.length === 0 ? (
         <div style={{ textAlign:'center', color:'#6b7280', padding:'40px 0' }}>
