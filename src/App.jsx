@@ -5,6 +5,7 @@ import SearchBar from './components/SearchBar'
 import ComparisonChart from './components/ComparisonChart'
 import StatsTable from './components/StatsTable'
 import { useIsMobile } from './hooks/useIsMobile'
+import ChatWidget from './components/ChatWidget'
 
 const DEMO = isDemoMode()
 const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
@@ -269,6 +270,8 @@ export default function App() {
       <footer className="border-t border-gray-800 px-6 py-4 text-gray-600 text-xs text-center">
         Net Profit • נתונים מ-Yahoo Finance • אין בנתונים אלו המלצת השקעה
       </footer>
+
+      <ChatWidget />
     </div>
   )
 }
