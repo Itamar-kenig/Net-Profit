@@ -7,7 +7,7 @@ import StatsTable from './components/StatsTable'
 import { useIsMobile } from './hooks/useIsMobile'
 
 const DEMO = isDemoMode()
-const CACHE_TTL = 4 * 60 * 60 * 1000 // 4 hours
+const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
 const STALE_THRESHOLD_DAYS = 7 // data older than 7 days triggers a refresh
 
 function getCached(sym) {
