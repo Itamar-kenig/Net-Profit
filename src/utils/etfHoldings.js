@@ -143,15 +143,15 @@ export const ETF_HOLDINGS = {
     { name: 'DHL Group',           pct: 3.0  },
   ],
   EWQ: [
-    { name: 'LVMH',                pct: 13.0 },
+    { name: 'LVMH',                pct: 11.0 },
     { name: 'TotalEnergies',       pct: 9.0  },
     { name: "L'Oreal",             pct: 8.0  },
     { name: 'Sanofi',              pct: 7.0  },
+    { name: 'Hermes',              pct: 6.0  },
     { name: 'BNP Paribas',         pct: 6.0  },
     { name: 'Schneider Electric',  pct: 5.0  },
     { name: 'AXA',                 pct: 5.0  },
     { name: 'Airbus',              pct: 5.0  },
-    { name: 'Hermes',              pct: 4.0  },
     { name: 'Safran',              pct: 3.0  },
   ],
   EWU: [
@@ -183,10 +183,10 @@ export const ETF_HOLDINGS = {
 
   // ── Taiwan ────────────────────────────────────────────────────────────────
   EWT: [
-    { name: 'TSMC',                pct: 25.0 },
-    { name: 'Hon Hai (Foxconn)',   pct: 7.0  },
-    { name: 'MediaTek',            pct: 7.0  },
-    { name: 'Delta Electronics',   pct: 4.0  },
+    { name: 'TSMC',                pct: 28.0 },
+    { name: 'Hon Hai (Foxconn)',   pct: 6.0  },
+    { name: 'MediaTek',            pct: 6.0  },
+    { name: 'Delta Electronics',   pct: 3.0  },
     { name: 'ASE Technology',      pct: 2.5  },
     { name: 'Largan Precision',    pct: 2.0  },
     { name: 'Cathay Financial',    pct: 2.0  },
@@ -560,13 +560,13 @@ export const ETF_HOLDINGS = {
   INDY: [
     { name: 'HDFC Bank',             pct: 14.0 },
     { name: 'Reliance Industries',   pct: 12.0 },
-    { name: 'Infosys',               pct: 10.0 },
-    { name: 'ICICI Bank',            pct: 8.0  },
-    { name: 'TCS',                   pct: 7.0  },
-    { name: 'Axis Bank',             pct: 4.0  },
+    { name: 'ICICI Bank',            pct: 9.0  },
+    { name: 'TCS',                   pct: 8.0  },
+    { name: 'Infosys',               pct: 7.0  },
+    { name: 'Axis Bank',             pct: 5.0  },
     { name: 'Bharti Airtel',         pct: 4.0  },
     { name: 'L&T',                   pct: 3.0  },
-    { name: 'HCL Technologies',      pct: 3.0  },
+    { name: 'ITC',                   pct: 3.0  },
     { name: 'Maruti Suzuki',         pct: 2.0  },
   ],
   XLV: [
