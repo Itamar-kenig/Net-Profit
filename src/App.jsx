@@ -172,11 +172,8 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-white">
       <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
         <div>
-          <img
-            src="/logo.svg"
-            alt="Net Profit"
-            style={{ height: isMobile ? 34 : 44, width: 'auto' }}
-          />
+          <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
+          {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
         </div>
         <div className={`flex items-center gap-3 text-sm ${isMobile ? 'self-start' : ''}`}>
           <label className="text-gray-400">השקעה ($):</label>
