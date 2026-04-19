@@ -189,7 +189,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`max-w-7xl mx-auto ${isMobile ? 'px-3 py-4' : 'px-4 py-6'} space-y-4`}>
+      <main className={`max-w-7xl mx-auto ${isMobile ? 'px-3 py-4' : 'px-4 py-6'} space-y-4`} style={{ paddingBottom: 80 }}>
         {DEMO && (
           <div className="bg-yellow-950 border border-yellow-700 text-yellow-300 px-4 py-2 rounded-lg text-sm">
             ⚠️ <strong>מצב Demo</strong> – נתונים מדומים. חבר Supabase לנתונים אמיתיים.

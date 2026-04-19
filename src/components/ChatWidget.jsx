@@ -64,7 +64,7 @@ export default function ChatWidget() {
         <button
           onClick={handleOpen}
           style={{
-            position: 'fixed', bottom: BOLT_H + 10, left: isMobile ? 16 : 20, zIndex: 100,
+            position: 'fixed', bottom: BOLT_H + 10, right: isMobile ? 16 : 20, zIndex: 100,
             width: 52, height: 52, borderRadius: '50%',
             background: 'linear-gradient(135deg, #16a34a, #4ade80)',
             border: 'none', cursor: 'pointer', fontSize: 24,
@@ -88,7 +88,7 @@ export default function ChatWidget() {
           position: 'fixed', zIndex: 100,
           ...(isMobile
             ? { bottom: BOLT_H, left: 0, right: 0, top: 0, borderRadius: '0 0 0 0' }
-            : { bottom: 72, left: 20, width: 360, height: 500, borderRadius: 14 }),
+            : { bottom: 72, right: 20, width: 360, height: 500, borderRadius: 14 }),
           background: '#111827', border: '1px solid #1f2937',
           display: 'flex', flexDirection: 'column',
           boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
