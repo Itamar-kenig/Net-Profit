@@ -34,9 +34,9 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: 'llama-3.1-8b-instant',
           messages: [{ role: 'system', content: CHAT_SYSTEM }, ...body.messages],
-          max_tokens: 800,
+          max_tokens: 500,
           temperature: 0.7,
           stream: false,
         }),
