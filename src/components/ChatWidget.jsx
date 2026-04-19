@@ -41,13 +41,23 @@ export default function ChatWidget() {
     const next = [...messages, { role: 'user', content: text }]
     setMessages(next)
     setLoading(true)
-    const { data } = await supabase.functions.invoke('get-symbol-info', {
-      body: { messages: next.map((m) => ({ role: m.role, content: m.content })) },
-    })
+
+    let reply = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-symbol-info', {
+          body: { messages: next.map((m) => ({ role: m.role, content: m.content })) },
+        })
+        if (data?.reply) { reply = data.reply; break }
+        if (error) console.error('attempt', attempt, error)
+      } catch (e) { console.error('attempt', attempt, e) }
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 1000))
+    }
+
     setLoading(false)
     setMessages([...next, {
       role: 'assistant',
-      content: data?.reply || 'מצטער, משהו השתבש. נסה שוב 🙏',
+      content: reply || 'לא הצלחתי לענות עכשיו — נסה שוב בעוד רגע 🙏',
     }])
   }
 
