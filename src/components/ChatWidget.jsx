@@ -65,7 +65,7 @@ export default function ChatWidget() {
         <button
           onClick={handleOpen}
           style={{
-            position: 'fixed', bottom: 20, right: 20, zIndex: 100,
+            position: 'fixed', bottom: 72, right: 20, zIndex: 100,
             width: 52, height: 52, borderRadius: '50%',
             background: 'linear-gradient(135deg, #16a34a, #4ade80)',
             border: 'none', cursor: 'pointer', fontSize: 24,
@@ -84,7 +84,7 @@ export default function ChatWidget() {
       {/* Chat panel */}
       {open && (
         <div style={{
-          position: 'fixed', bottom: 20, right: 20, zIndex: 100,
+          position: 'fixed', bottom: 72, right: 20, zIndex: 100,
           width: panelW, height: panelH,
           background: '#111827', border: '1px solid #1f2937',
           borderRadius: 14, display: 'flex', flexDirection: 'column',
