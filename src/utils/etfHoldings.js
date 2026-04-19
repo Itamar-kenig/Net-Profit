@@ -289,15 +289,15 @@ export const ETF_HOLDINGS = {
 
   // ── Sector ETFs ───────────────────────────────────────────────────────────
   XLK: [
+    { name: 'NVIDIA (NVDA)',       pct: 22.0 },
     { name: 'Microsoft (MSFT)',    pct: 22.0 },
-    { name: 'Apple (AAPL)',        pct: 20.0 },
-    { name: 'NVIDIA (NVDA)',       pct: 20.0 },
-    { name: 'Broadcom (AVGO)',     pct: 5.5  },
-    { name: 'Salesforce (CRM)',    pct: 2.5  },
-    { name: 'Oracle (ORCL)',       pct: 2.0  },
-    { name: 'AMD',                 pct: 1.8  },
-    { name: 'Qualcomm (QCOM)',     pct: 1.5  },
-    { name: 'Texas Instruments',   pct: 1.5  },
+    { name: 'Broadcom (AVGO)',     pct: 6.0  },
+    { name: 'Apple (AAPL)',        pct: 6.0  },
+    { name: 'Salesforce (CRM)',    pct: 3.0  },
+    { name: 'Oracle (ORCL)',       pct: 2.5  },
+    { name: 'AMD',                 pct: 2.0  },
+    { name: 'Qualcomm (QCOM)',     pct: 2.0  },
+    { name: 'Texas Instruments',   pct: 2.0  },
     { name: 'ServiceNow (NOW)',    pct: 1.5  },
   ],
   VGT: [
