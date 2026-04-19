@@ -14,6 +14,20 @@ export default function InfoModal({ symbol, color, onClose }) {
 
   useEffect(() => {
     let cancelled = false
+
+    const cacheKey = `np-info-${symbol}`
+    const cached = (() => {
+      try {
+        const item = localStorage.getItem(cacheKey)
+        if (!item) return null
+        const { text, ts } = JSON.parse(item)
+        if (Date.now() - ts > 7 * 24 * 60 * 60 * 1000) { localStorage.removeItem(cacheKey); return null }
+        return text
+      } catch { return null }
+    })()
+
+    if (cached) { setInfo(cached); setLoading(false); return }
+
     setLoading(true)
     setInfo(null)
     setError(null)
@@ -26,6 +40,7 @@ export default function InfoModal({ symbol, color, onClose }) {
         } else if (!data?.success) {
           setError(`שגיאה: ${data?.error || 'תגובה לא תקינה'}`)
         } else {
+          try { localStorage.setItem(cacheKey, JSON.stringify({ text: data.info, ts: Date.now() })) } catch {}
           setInfo(data.info)
         }
         setLoading(false)
