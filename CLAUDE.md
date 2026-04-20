@@ -26,7 +26,8 @@
 | `src/utils/finance.js` | כל הלוגיקה הפיננסית |
 | `src/utils/mockData.js` | נתוני demo כשאין Supabase |
 | `src/utils/symbolsDb.js` | מאגר ~85 סימולים כולל מדדים ישראליים + בינלאומיים, עם מילות חיפוש בעברית ואנגלית |
-| `src/utils/etfHoldings.js` | נתוני הרכב סטטיים (top-10 אחזקות + %) לכ-75 קרנות סל ומדדים (כולל מדדים ישראליים, אירופאיים, אסייתיים) |
+| `src/utils/etfHoldings.js` | נתוני הרכב סטטיים (top-10 אחזקות + %) לכ-75 קרנות סל ומדדים (כולל מדדים ישראליים, אירופאיים, אסייתיים) — עודכן ל-2024 |
+| `src/hooks/useIsMobile.js` | hook שמחזיר `true` כאשר רוחב המסך < 768px; משמש ב-App, ChatWidget, StatsTable, ComparisonChart לבחירת layout |
 
 ### קומפוננטות
 
@@ -67,6 +68,18 @@
 ### Benchmark (S&P 500)
 כפתור `⚖ S&P 500` בתפריט התקופות מוסיף קו benchmark מקווקו אפור לגרף.
 הנתונים נטענים בנפרד ב-`App.jsx` (לא נכנסים ל-StatsTable).
+
+### Mobile-Responsive Layout
+האפליקציה מותאמת במלואה למובייל דרך hook `useIsMobile` (breakpoint: 768px):
+- Header: עמודה אנכית במובייל, שורה אופקית בדסקטופ
+- גרף: margin שלילי (-12px) לרוחב מסך מלא במובייל
+- StatsTable: כל העמודות מוצגות במובייל עם גלילה אופקית; כפתורי ℹ ו-הרכב עם touch targets גדולים
+- ChatWidget: מסך מלא במובייל (top:0), חלונית 360×500px בדסקטופ
+
+### "Made in Bolt" Badge
+האתר מתארח על Bolt ומציג badge קבוע בגובה **55px** (`BOLT_H = 55`) בתחתית המסך.
+- כל אלמנטים fixed-bottom ממוקמים מעליו: כפתור הצ'אט ב-`bottom: BOLT_H + 10 = 65px`
+- `<main>` מקבל `paddingBottom: 80px` כדי שהתוכן לא יוסתר מתחת לכפתור הצ'אט
 
 ### Demo Mode
 כשאין `VITE_SUPABASE_URL` אמיתי — `isDemoMode()` מחזיר `true` ו-`App.jsx` טוען נתונים מ-`mockData.js` (Geometric Brownian Motion).
@@ -146,7 +159,7 @@ Secrets נדרשים: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_ACCESS_T
 
 **Indexes:** על `symbol`, `date`, `(symbol, date DESC)`
 **RLS:** קריאה פתוחה לכל (anon key) / כתיבה רק ל-service_role
-**Limit:** query limit מוגדר ל-10,000 שורות
+**Limit:** query limit ב-App.jsx מוגדר ל-20,000 שורות לכל סימול
 
 ### Migration
 `supabase/migrations/20240101000000_create_historical_prices.sql`
