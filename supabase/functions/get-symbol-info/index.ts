@@ -30,12 +30,14 @@ Deno.serve(async (req) => {
 
     // ── Chat mode ──────────────────────────────────────────────
     if (body.messages) {
+      const today = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' })
+      const systemWithDate = `${CHAT_SYSTEM}\n\nהיום: ${today}. השתמש בידע שלך בביטחון לעובדות ידועות. לנתונים שמשתנים תכופות (מחירי מניות, דירוגי עשירים, שערי חליפין) — ציין שהנתון מבוסס על הידע שלך ועשוי להשתנות, והמלץ לבדוק ב-Bloomberg, Forbes או Yahoo Finance לנתון עדכני.`
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
           model: 'llama-3.1-8b-instant',
-          messages: [{ role: 'system', content: CHAT_SYSTEM }, ...body.messages],
+          messages: [{ role: 'system', content: systemWithDate }, ...body.messages],
           max_tokens: 500,
           temperature: 0.7,
           stream: false,
