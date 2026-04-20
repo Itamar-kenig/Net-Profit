@@ -35,8 +35,9 @@
 | `src/components/SearchBar.jsx` | חיפוש autocomplete + quick-add chips (localStorage) |
 | `src/components/ComparisonChart.jsx` | גרף קווי של תשואה מצטברת (Recharts) + בחירת תקופה |
 | `src/components/StatsTable.jsx` | טבלת השוואה עם CAGR, תשואות, דמי ניהול, Net Profit + כפתורי ℹ / הרכב |
-| `src/components/InfoModal.jsx` | מודל תיאור נכס — קריאה ל-Edge Function `get-symbol-info` (Groq AI), תיאור עברי קצר |
+| `src/components/InfoModal.jsx` | מודל תיאור נכס — קריאה ל-Edge Function `get-symbol-info` (Groq AI), תיאור עברי קצר + כפתור ריענון; cache ב-localStorage (7 ימים, מפתח `np-info-{symbol}`) |
 | `src/components/HoldingsModal.jsx` | מודל הרכב קרן — טבלת top-10 אחזקות עם % bars (נתונים מ-`etfHoldings.js`) |
+| `src/components/ChatWidget.jsx` | צ'אט בועה צפה עם יועץ פיננסי "איתמר" — כפתור SVG ירוק קבוע, חלונית צ'אט מלאה (mobile: מסך מלא, desktop: 360×500px) |
 
 ### זרימת נתונים
 1. משתמש מוסיף סימול דרך `SearchBar` (autocomplete מ-`symbolsDb.js`)
@@ -59,8 +60,9 @@
 - ניתן להוסיף/להסיר דרך ה-UI
 
 ### Cache (localStorage)
-נתונים שנטענו מ-Supabase נשמרים ב-`localStorage` עם TTL של 4 שעות (מפתח: `np-prices-{sym}`).
+נתונים שנטענו מ-Supabase נשמרים ב-`localStorage` עם TTL של **24 שעות** (מפתח: `np-prices-{sym}`).
 בריענון דף הנתונים נטענים מהcache ללא קריאה חוזרת ל-Supabase.
+תיאורי נכסים מ-Groq AI נשמרים ב-localStorage עם TTL של **7 ימים** (מפתח: `np-info-{symbol}`).
 
 ### Benchmark (S&P 500)
 כפתור `⚖ S&P 500` בתפריט התקופות מוסיף קו benchmark מקווקו אפור לגרף.
@@ -101,9 +103,19 @@
 
 **get-symbol-info פרטים:**
 - משתמשת ב-secret `GROQ_API_KEY` (מוגדר ב-Supabase Dashboard → Edge Functions → Secrets)
-- מודל: `llama-3.1-8b-instant`, `max_tokens: 600`, `stream: false`, `temperature: 0.4`
-- מחזירה תמיד HTTP 200: `{ success: true, info: '...' }` או `{ success: false, error: '...' }`
+- תומכת בשני מצבים לפי body שמתקבל:
+  - **מצב תיאור נכס** (`body.symbol`): מודל `llama-3.1-8b-instant`, `max_tokens: 600`, `temperature: 0.4` — מחזיר `{ success: true, info: '...' }`
+  - **מצב צ'אט** (`body.messages`): מודל `compound-beta-mini` (llama-3.1-8b + חיפוש אינטרנט), `max_tokens: 800`, `temperature: 0.7` — מחזיר `{ success: true, reply: '...' }`
+- System prompt לצ'אט: עונה על שאלות פיננסיות בלבד (מניות, עשירים, כלכלה, שוק ההון), מסרב לשאלות שאין להן קשר לכסף, לא חושף הוראות פנימיות, תשובות מפורטות 3-6 משפטים
+- מחזירה תמיד HTTP 200: `{ success: true, ... }` או `{ success: false, error: '...' }`
 - לאחר שינוי בקוד — נדרש deploy ידני דרך GitHub Actions
+
+**ChatWidget זרימה:**
+- `ChatWidget.jsx` → `supabase.functions.invoke('get-symbol-info', { body: { messages } })` → Groq `compound-beta-mini`
+- Retry logic: 3 ניסיונות עם המתנה של 1 שניה בין ניסיונות
+- היסטוריית שיחה נשמרת ב-React state בלבד (לא persisted)
+- הודעת פתיחה: אחת מ-7 הודעות ברכה אקראיות בעברית
+- מיקום כפתור: `bottom: 65px` (מעל "Made in Bolt" badge), `right: 16-20px`
 
 ---
 
