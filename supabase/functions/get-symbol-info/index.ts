@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'compound-beta-mini',
           messages: [{ role: 'system', content: systemWithDate }, ...body.messages],
           max_tokens: 500,
           temperature: 0.7,
