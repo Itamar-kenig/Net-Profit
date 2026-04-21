@@ -42,9 +42,6 @@ export default function App() {
   const [period, setPeriod] = useState('5Y')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
-  const [benchmark, setBenchmark] = useState(false)
-  const [benchmarkData, setBenchmarkData] = useState(null)
-
   const fetchPrices = useCallback(
     async (syms) => {
       const missing = syms.filter((s) => !pricesMap[s])
@@ -147,25 +144,6 @@ export default function App() {
     setPricesMap((prev) => { const n = { ...prev }; delete n[sym]; return n })
   }
 
-  async function toggleBenchmark() {
-    if (benchmark) { setBenchmark(false); return }
-    if (!benchmarkData) {
-      const cached = getCached('^GSPC')
-      if (cached && !isDataStale(cached)) { setBenchmarkData(cached); setBenchmark(true); return }
-      if (cached) localStorage.removeItem('np-prices-^GSPC')
-      const { data } = await supabase
-        .from('historical_prices')
-        .select('date, adj_close, close')
-        .eq('symbol', '^GSPC')
-        .order('date', { ascending: true })
-        .limit(20000)
-      const d = data ?? []
-      setBenchmarkData(d)
-      if (d.length) setCached('^GSPC', d)
-    }
-    setBenchmark(true)
-  }
-
   const isLoading = loading || !!fetchingSymbol
   const isMobile = useIsMobile()
 
@@ -242,9 +220,6 @@ export default function App() {
                 customEnd={customEnd}
                 setCustomStart={setCustomStart}
                 setCustomEnd={setCustomEnd}
-                benchmark={benchmark}
-                benchmarkData={benchmarkData}
-                onToggleBenchmark={toggleBenchmark}
               />
             </div>
             <StatsTable
