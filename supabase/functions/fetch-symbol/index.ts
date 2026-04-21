@@ -5,6 +5,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+const YAHOO_URLS = (sym: string) => [
+  `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=25y&interval=1d&includeAdjustedClose=true`,
+  `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=25y&interval=1d&includeAdjustedClose=true`,
+]
+
+const YF_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+  'Accept': 'application/json',
+}
+
+async function fetchYahoo(sym: string): Promise<Response> {
+  const urls = YAHOO_URLS(sym)
+  let lastErr = ''
+  for (const url of urls) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 1000 * 2 ** (attempt - 1)))
+      const res = await fetch(url, { headers: YF_HEADERS })
+      if (res.ok) return res
+      lastErr = `${res.status}`
+      if (res.status === 404) break
+    }
+  }
+  throw new Error(`Yahoo Finance failed after retries: ${lastErr}`)
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -20,20 +45,8 @@ Deno.serve(async (req) => {
 
     const sym = symbol.toUpperCase()
 
-    // ── Fetch from Yahoo Finance ────────────────────────────────
-    const yUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=25y&interval=1d&includeAdjustedClose=true`
-    const yRes = await fetch(yUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json',
-      },
-    })
-
-    if (!yRes.ok) {
-      return new Response(JSON.stringify({ error: `Yahoo Finance error: ${yRes.status}` }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    // ── Fetch from Yahoo Finance (with retry + fallback) ───────
+    const yRes = await fetchYahoo(sym)
 
     const yData = await yRes.json()
     const result = yData?.chart?.result?.[0]
