@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     // ── Chat mode ──────────────────────────────────────────────
     if (body.messages) {
       const today = new Date().toLocaleDateString('he-IL', { year: 'numeric', month: 'long', day: 'numeric' })
-      const systemWithDate = `${CHAT_SYSTEM}\n\nהיום: ${today}. השתמש בידע שלך בביטחון לעובדות ידועות. לנתונים שמשתנים תכופות (מחירי מניות, דירוגי עשירים, שערי חליפין) — ציין שהנתון מבוסס על הידע שלך ועשוי להשתנות, והמלץ לבדוק ב-Bloomberg, Forbes או Yahoo Finance לנתון עדכני.`
+      const systemWithDate = `${CHAT_SYSTEM}\n\nהיום: ${today}. יש לך גישה לחיפוש אינטרנט בזמן אמת — השתמש בו לכל שאלה על נתונים עדכניים: מחירי מניות, תשואות, דירוגים, שערי חליפין. אל תפנה את המשתמש לאתרים חיצוניים — חפש בעצמך וענה ישירות.`
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
