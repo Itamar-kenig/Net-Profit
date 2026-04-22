@@ -6,6 +6,7 @@ import ComparisonChart from './components/ComparisonChart'
 import StatsTable from './components/StatsTable'
 import { useIsMobile } from './hooks/useIsMobile'
 import ChatWidget from './components/ChatWidget'
+import HamburgerMenu from './components/HamburgerMenu'
 
 const DEMO = isDemoMode()
 const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
@@ -149,12 +150,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
-        <div>
-          <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
-          {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
+      <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex items-center justify-between`}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <HamburgerMenu />
+          <div>
+            <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
+            {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
+          </div>
         </div>
-        <div className={`flex items-center gap-3 text-sm ${isMobile ? 'self-start' : ''}`}>
+        <div className="flex items-center gap-3 text-sm">
           <label className="text-gray-400">השקעה ($):</label>
           <input
             type="number"
