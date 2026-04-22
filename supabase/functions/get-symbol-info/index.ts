@@ -28,10 +28,12 @@ function extractSymbols(text: string): string[] {
     if (lower.includes(name)) found.add(sym)
   }
 
-  // uppercase ticker patterns: VOO, AAPL, ^GSPC, BTC-USD
-  const matches = text.match(/\^?[A-Z]{2,5}(?:-[A-Z]{2,3})?/g) ?? []
-  const SKIP = new Set(['CEO', 'ETF', 'IPO', 'USD', 'GDP', 'CPI', 'USA', 'NYSE', 'API', 'URL', 'AI'])
-  for (const m of matches) {
+  const SKIP = new Set(['CEO', 'ETF', 'IPO', 'USD', 'GDP', 'CPI', 'USA', 'NYSE', 'API', 'URL', 'AI', 'IS', 'AS', 'TO', 'OF', 'IN', 'ON', 'AT', 'AN', 'OR', 'BY', 'BE'])
+  // uppercase tickers in original text: VOO, ^GSPC, BTC-USD
+  const upper = text.match(/\^?[A-Z]{2,5}(?:-[A-Z]{2,3})?/g) ?? []
+  // lowercase/mixed tickers: "voo", "aapl" → uppercase
+  const wordMatches = text.match(/\b[a-zA-Z]{2,5}\b/g) ?? []
+  for (const m of [...upper, ...wordMatches.map(w => w.toUpperCase())]) {
     if (!SKIP.has(m)) found.add(m)
   }
 
