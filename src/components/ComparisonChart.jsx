@@ -42,9 +42,12 @@ function CustomTooltip({ active, payload, label, investment, showDollar }) {
   )
 }
 
+const BENCHMARK_SYM = '^GSPC'
+
 export default function ComparisonChart({
   symbols, pricesMap, investment, period, setPeriod,
   customStart, customEnd, setCustomStart, setCustomEnd,
+  benchmark, benchmarkData, onToggleBenchmark,
 }) {
   const [showDollar, setShowDollar] = useState(false)
   const isMobile = useIsMobile()
@@ -52,7 +55,12 @@ export default function ComparisonChart({
   for (const sym of symbols) {
     filteredMap[sym] = filterPrices(pricesMap[sym] || [], period, customStart, customEnd)
   }
-  const chartData = buildChartData(symbols, filteredMap)
+  const showBenchmarkLine = benchmark && benchmarkData?.length > 0 && !symbols.includes(BENCHMARK_SYM)
+  if (showBenchmarkLine) {
+    filteredMap[BENCHMARK_SYM] = filterPrices(benchmarkData, period, customStart, customEnd)
+  }
+  const chartSymbols = showBenchmarkLine ? [...symbols, BENCHMARK_SYM] : symbols
+  const chartData = buildChartData(chartSymbols, filteredMap)
 
   return (
     <div style={{ background:'#111827', border:'1px solid #1f2937', borderRadius:12, padding: isMobile ? '12px 0 8px' : 16 }}>
@@ -102,6 +110,21 @@ export default function ComparisonChart({
           >
             $ ←→ %
           </button>
+          {/* Benchmark toggle */}
+          {onToggleBenchmark && (
+            <button
+              onClick={onToggleBenchmark}
+              style={{
+                padding: isMobile ? '6px 10px' : '3px 10px',
+                borderRadius:6, fontSize: isMobile ? 13 : 12, cursor:'pointer',
+                background: benchmark ? '#374151' : '#1f2937',
+                color: benchmark ? '#d1d5db' : '#6b7280',
+                border: benchmark ? '1px solid #6b7280' : '1px solid #374151',
+              }}
+            >
+              {benchmark ? '✕ S&P 500' : '⚖ S&P 500'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -147,6 +170,9 @@ export default function ComparisonChart({
               {symbols.map((sym, i) => (
                 <Line key={sym} type="monotone" dataKey={sym} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={2} connectNulls />
               ))}
+              {showBenchmarkLine && (
+                <Line key={BENCHMARK_SYM} type="monotone" dataKey={BENCHMARK_SYM} stroke="#6b7280" dot={false} strokeWidth={1.5} strokeDasharray="5 3" connectNulls />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -17,8 +17,6 @@ export const SYMBOLS_DB = [
     keywords: ['s&p', 'sp500', 's&p 500', 'spdr', 'סנופי', 'קרן סל'] },
 
   // ── NASDAQ ───────────────────────────────────────────────
-  { symbol: '^NDX',  name: 'NASDAQ 100 Index',
-    keywords: ['nasdaq 100', 'nasdaq100', 'נאסד״ק 100', 'נאסדק 100', 'נאסד 100', 'tech', 'טכנולוגיה', 'index', 'מדד טכנולוגיה', 'הייטק'] },
   { symbol: '^IXIC', name: 'NASDAQ Composite Index',
     keywords: ['nasdaq', 'נאסד״ק', 'נאסדק', 'נאסד', 'tech', 'טכנולוגיה', 'index', 'מדד טכנולוגיה', 'הייטק'] },
   { symbol: 'QQQ',   name: 'Invesco NASDAQ 100 ETF',

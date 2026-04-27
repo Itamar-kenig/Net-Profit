@@ -6,7 +6,6 @@ import ComparisonChart from './components/ComparisonChart'
 import StatsTable from './components/StatsTable'
 import { useIsMobile } from './hooks/useIsMobile'
 import ChatWidget from './components/ChatWidget'
-import HamburgerMenu from './components/HamburgerMenu'
 
 const DEMO = isDemoMode()
 const CACHE_TTL = 24 * 60 * 60 * 1000 // 24 hours
@@ -43,6 +42,9 @@ export default function App() {
   const [period, setPeriod] = useState('5Y')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
+  const [benchmark, setBenchmark] = useState(false)
+  const [benchmarkData, setBenchmarkData] = useState(null)
+
   const fetchPrices = useCallback(
     async (syms) => {
       const missing = syms.filter((s) => !pricesMap[s])
@@ -145,20 +147,36 @@ export default function App() {
     setPricesMap((prev) => { const n = { ...prev }; delete n[sym]; return n })
   }
 
+  async function toggleBenchmark() {
+    if (benchmark) { setBenchmark(false); return }
+    if (!benchmarkData) {
+      const cached = getCached('^GSPC')
+      if (cached && !isDataStale(cached)) { setBenchmarkData(cached); setBenchmark(true); return }
+      if (cached) localStorage.removeItem('np-prices-^GSPC')
+      const { data } = await supabase
+        .from('historical_prices')
+        .select('date, adj_close, close')
+        .eq('symbol', '^GSPC')
+        .order('date', { ascending: true })
+        .limit(20000)
+      const d = data ?? []
+      setBenchmarkData(d)
+      if (d.length) setCached('^GSPC', d)
+    }
+    setBenchmark(true)
+  }
+
   const isLoading = loading || !!fetchingSymbol
   const isMobile = useIsMobile()
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex items-center justify-between`}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <HamburgerMenu />
-          <div>
-            <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
-            {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
-          </div>
+      <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex ${isMobile ? 'flex-col gap-2' : 'items-center justify-between'}`}>
+        <div>
+          <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
+          {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className={`flex items-center gap-3 text-sm ${isMobile ? 'self-start' : ''}`}>
           <label className="text-gray-400">השקעה ($):</label>
           <input
             type="number"
@@ -224,6 +242,9 @@ export default function App() {
                 customEnd={customEnd}
                 setCustomStart={setCustomStart}
                 setCustomEnd={setCustomEnd}
+                benchmark={benchmark}
+                benchmarkData={benchmarkData}
+                onToggleBenchmark={toggleBenchmark}
               />
             </div>
             <StatsTable

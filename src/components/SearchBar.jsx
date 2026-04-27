@@ -1,12 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { searchSymbols } from '../utils/symbolsDb'
 
-const DEFAULT_QUICK = ['^GSPC', '^NDX', '^IXIC', '^DJI', 'SPY', 'QQQ', 'VOO', 'GLD']
-
-const QUICK_LABELS = {
-  '^GSPC': 'S&P 500',
-  '^NDX':  'נאסד"ק 100',
-}
+const DEFAULT_QUICK = ['^GSPC', '^IXIC', '^DJI', 'SPY', 'QQQ', 'VOO', 'GLD']
 
 function loadQuick() {
   try { return JSON.parse(localStorage.getItem('np-quick') ?? 'null') || DEFAULT_QUICK } catch { return DEFAULT_QUICK }
@@ -161,7 +156,7 @@ export default function SearchBar({ onAdd }) {
             <button onClick={() => onAdd(sym)} style={{
               fontSize: 12, color: '#9ca3af', background: 'transparent',
               padding: '3px 8px 3px 10px', border: 'none', cursor: 'pointer',
-            }}>{QUICK_LABELS[sym] ?? sym}</button>
+            }}>{sym}</button>
             <button onClick={() => removeFromQuick(sym)} title="הסר" style={{
               fontSize: 12, color: '#6b7280', background: 'transparent',
               padding: '3px 8px 3px 4px', border: 'none', cursor: 'pointer', lineHeight: 1,
