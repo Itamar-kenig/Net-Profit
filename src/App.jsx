@@ -152,7 +152,6 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-white">
       <header className={`border-b border-gray-800 ${isMobile ? 'px-4 py-3' : 'px-6 py-4'} flex items-center justify-between`}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <HamburgerMenu />
           <div>
             <h1 className={`font-bold text-green-400 tracking-tight ${isMobile ? 'text-xl' : 'text-2xl'}`}>Net Profit</h1>
             {!isMobile && <p className="text-gray-500 text-sm">ניתוח והשוואת מניות, מדדים וקרנות סל</p>}
@@ -168,6 +167,7 @@ export default function App() {
             onChange={(e) => setInvestment(Math.max(0, Number(e.target.value)))}
             className={`${isMobile ? 'w-32' : 'w-28'} bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-white text-right focus:outline-none focus:border-green-500 transition-colors`}
           />
+          <HamburgerMenu />
         </div>
       </header>
 
